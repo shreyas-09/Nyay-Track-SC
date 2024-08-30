@@ -161,6 +161,7 @@ if page == "current_case":
     with st.sidebar:
         # st.sidebar.image("lawyer.png", use_column_name = True)  # Replace with an actual user image
         # st.logo("lawyer.png")
+        st.sidebar.image("lawyer.png")
         st.write("### USER NAME")
 
         if st.button("📝 New Case"):
@@ -238,7 +239,7 @@ elif page == "new_case":
     st.title("NEW CASE")
 
     # Input for case name
-    case_name = st.text_input("Enter New Case Name *", "")
+    case_name = st.text_input("Enter New Case Diary Number *", "")
 
     pdf_docs = st.file_uploader(
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
@@ -268,6 +269,7 @@ elif page == "new_case":
 elif page == "sign_in":
     # Set up the page layout and title
     # st.set_page_config(page_title="Sign In", layout="centered")
+    st.image("lawyer.png")
     st.title("Sign In to Your Account")
 
     # Placeholder for the login status
@@ -302,6 +304,25 @@ elif page == "sign_in":
     st.write("Don't have an account? [Sign up](#)")
 
 elif page == "validate":
+    with st.sidebar:
+        st.sidebar.image("lawyer.png")# Replace with an actual user image
+        st.write("### USER NAME")
+
+        if st.button("📝 New Case"):
+            navigate_to("new_case")
+        
+        # if st.button("📁 Current Case"):
+        #     navigate_to("current_case")
+        
+        # st.markdown("### 📁 Previous Cases")
+        for case in st.session_state.cases:
+            st.markdown(f"### {case}")
+        # print(st.session_state.cases[0])
+
+        st.text_input("Search Previous Cases")
+        st.button("Settings")
+        st.button("Help")
+        st.button("Logout Account")
     
     st.title("CHECK FOR COMPLETENESS")
 
@@ -333,11 +354,49 @@ elif page == "validate":
     #     else:
     #         st.error(item["text"])
 elif page == "entities":
+    with st.sidebar:
+        st.sidebar.image("lawyer.png")# Replace with an actual user image
+        st.write("### USER NAME")
+
+        if st.button("📝 New Case"):
+            navigate_to("new_case")
+        
+        # if st.button("📁 Current Case"):
+        #     navigate_to("current_case")
+        
+        # st.markdown("### 📁 Previous Cases")
+        for case in st.session_state.cases:
+            st.markdown(f"### {case}")
+        # print(st.session_state.cases[0])
+
+        st.text_input("Search Previous Cases")
+        st.button("Settings")
+        st.button("Help")
+        st.button("Logout Account")
     st.title("Entity List")
     ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
     user_input_details(ques)
 
 elif page == "uploaded_docs":
+    with st.sidebar:
+        st.sidebar.image("lawyer.png")# Replace with an actual user image
+        st.write("### USER NAME")
+
+        if st.button("📝 New Case"):
+            navigate_to("new_case")
+        
+        # if st.button("📁 Current Case"):
+        #     navigate_to("current_case")
+        
+        # st.markdown("### 📁 Previous Cases")
+        for case in st.session_state.cases:
+            st.markdown(f"### {case}")
+        # print(st.session_state.cases[0])
+
+        st.text_input("Search Previous Cases")
+        st.button("Settings")
+        st.button("Help")
+        st.button("Logout Account")
     st.title("CURRENT CASE NAME")
     
     # Display uploaded documents
@@ -367,8 +426,10 @@ elif page == "uploaded_docs":
     # st.button("UPLOAD MORE FILES ⏏️", key="upload_files")
 
 elif page == "chatbot":
+    st.title("CHAT ABOUT THE CASE")
+
     with st.sidebar:
-        st.image("lawyer.png", width=50)  # Replace with an actual user image
+        st.sidebar.image("lawyer.png")# Replace with an actual user image
         st.write("### USER NAME")
 
         if st.button("📝 New Case"):
