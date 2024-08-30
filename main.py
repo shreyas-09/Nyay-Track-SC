@@ -275,8 +275,8 @@ elif page == "sign_in":
 
     # Create a sign-in form
     with st.form(key='signin_form'):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type='password')
+        username = st.text_input("Username","user")
+        password = st.text_input("Password", "password",type='password')
         
         # Submit button for the form
         submit_button = st.form_submit_button(label="Sign In")
