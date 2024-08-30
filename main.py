@@ -313,7 +313,7 @@ elif page == "validate":
     # st.write("**Petitioner's Address:** Flat No. 202, Shanti Apartments, Mumbai, Maharashtra - 400069")
     # st.write("**COURT:** Supreme Court")
 
-    ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Also, If there is a missing entity highlight it as incomplete and cite the text from the document to support the incompleteness."
+    ques = "You are an expert lawyer, Compare the files with the latest Supreme Court of India rules, Point out incompleteness in the documents if any also point out any rules which have not been followed in the files in terms of completeness."
     user_input_details(ques)
 
     # Checklist Section
@@ -334,7 +334,7 @@ elif page == "validate":
     #         st.error(item["text"])
 elif page == "entities":
     st.title("Entity List")
-    ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Also, If there is a missing entity highlight it as incomplete and cite the text from the document to support the incompleteness."
+    ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
     user_input_details(ques)
 
 elif page == "uploaded_docs":
