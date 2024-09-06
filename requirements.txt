@@ -8,3 +8,4 @@ streamlit_extras
 faiss-cpu
 torch
 transformers
+reportlab

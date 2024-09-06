@@ -6,6 +6,28 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
+st.set_page_config(layout="wide")
+
+if "responseSave1" not in st.session_state:
+    st.session_state.responseSave1 = ""
+if "responseSave2" not in st.session_state:
+    st.session_state.responseSave2 = ""
+
+
+st.markdown("""
+<style>
+.stButton > button {
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #F16556;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
@@ -18,6 +40,7 @@ with st.sidebar:
         st.markdown(f"### {case}")
     
     st.text_input("Search Previous Cases")
+    st.markdown("""---""")
     st.button("Settings")
     st.button("Help")
     st.button("Logout Account")
@@ -39,37 +62,71 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    with st.spinner("Processing"):
-        embeddings = HuggingFaceEmbeddings()
+    if st.session_state.responseSave1 == "":
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
+
+            chain = get_conversational_chain()
+
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
         
-        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(user_question)
+            styled_res = res.replace('\n', '<br>')
+            st.markdown(f"""
+            <div style="font-size: 18px;">
+                {styled_res}
+            </div>
+            """, unsafe_allow_html=True)
+            st.session_state.responseSave1 = styled_res
+    else:
+        st.markdown(f"""
+        <div style="font-size: 18px;">
+            {st.session_state.responseSave1}
+        </div>
+        """, unsafe_allow_html=True)
 
-        chain = get_conversational_chain()
+def user_input_details_2(user_question):
+    if st.session_state.responseSave2 == "":
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
 
-        
-        response = chain(
-            {"input_documents":docs, "question": user_question}
-            , return_only_outputs=True)
+            chain = get_conversational_chain()
 
-        res = response["output_text"]
-        # response = f"Nyay: {res}"
-        st.write(res)
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
 
-st.title("Case Details Page")
+            res = response["output_text"]
+            st.write(res)
+            st.session_state.responseSave2 = res
+    else:
+        st.write(st.session_state.responseSave2)
+
+st.title("Case SUMMARY")
 
 st.write("### Summary of the Case")
 ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
 user_input_details(ques)
 
-st.title("Entity List")
+st.write("### Entity List")
 ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
-user_input_details(ques)
+user_input_details_2(ques)
 
 st.write("### CHOOSE WHAT TO DO NEXT")
 col1, col2, col3 = st.columns(3)
 with col1:
-    if(st.button("Check for Completeness")):
+    if(st.button("Check for Defects")):
         st.switch_page("pages/validate.py")
 with col2:
     if(st.button("Chat about the Case")):

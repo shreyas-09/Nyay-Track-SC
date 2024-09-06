@@ -4,6 +4,20 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+st.markdown("""
+<style>
+.stButton > button {
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #F16556;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
@@ -16,6 +30,7 @@ with st.sidebar:
         st.markdown(f"### {case}")
     
     st.text_input("Search Previous Cases")
+    st.markdown("""---""")
     st.button("Settings")
     st.button("Help")
     st.button("Logout Account")

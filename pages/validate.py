@@ -6,6 +6,23 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
+st.markdown("""
+<style>
+.stButton > button {
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #F16556;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+if "responseSave3" not in st.session_state:
+    st.session_state.responseSave3 = ""
+
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
@@ -18,6 +35,7 @@ with st.sidebar:
         st.markdown(f"### {case}")
     
     st.text_input("Search Previous Cases")
+    st.markdown("""---""")
     st.button("Settings")
     st.button("Help")
     st.button("Logout Account")
@@ -39,24 +57,37 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    with st.spinner("Processing"):
-        embeddings = HuggingFaceEmbeddings()
+    if st.session_state.responseSave3 == "":
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
+
+            chain = get_conversational_chain()
+
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
         
-        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(user_question)
+            styled_res = res.replace('\n', '<br>')
+            st.markdown(f"""
+            <div style="font-size: 18px;">
+                {styled_res}
+            </div>
+            """, unsafe_allow_html=True)
+            st.session_state.responseSave3 = styled_res
+    else:
+        st.markdown(f"""
+        <div style="font-size: 18px;">
+            {st.session_state.responseSave3}
+        </div>
+        """, unsafe_allow_html=True)
 
-        chain = get_conversational_chain()
 
-        response = chain(
-            {"input_documents":docs, "question": user_question}
-            , return_only_outputs=True)
-
-        res = response["output_text"]
-        # response = f"Nyay: {res}"
-        st.write(res)
-
-
-st.title("CHECK FOR COMPLETENESS")
+st.title("CHECK FOR DEFECTS")
 
 ques = "You are an expert lawyer, Compare the files with the latest Supreme Court of India rules, Point out incompleteness in the documents if any also point out any rules which have not been followed in the files in terms of completeness."
 user_input_details(ques)
