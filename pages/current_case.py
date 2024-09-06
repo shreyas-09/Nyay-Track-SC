@@ -113,7 +113,9 @@ def user_input_details_2(user_question):
     else:
         st.write(st.session_state.responseSave2)
 
-st.title("Case SUMMARY")
+c = st.session_state.cases[-1]
+s= "CASE: "+c
+st.title(s)
 
 st.write("### Summary of the Case")
 ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."

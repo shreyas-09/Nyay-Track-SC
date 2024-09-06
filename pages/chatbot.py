@@ -45,10 +45,10 @@ with st.sidebar:
     st.button("Help")
     st.button("Logout Account")
 
-
+name = st.session_state.cases[-1]
 def generate_pdf(text):
 
-    text = "SUMMARY OF THE CASE\n"+text
+    text = "SUMMARY OF THE CASE "+name+"\n"+text
     # Create a buffer to hold the PDF data
     buffer = io.BytesIO()
 
@@ -120,7 +120,7 @@ if "totalResponse" not in st.session_state:
 
 if st.button("Generate Key Points"):
     with st.spinner("Processing"):
-        ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
+        ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
         embeddings = HuggingFaceEmbeddings()
         
         new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
