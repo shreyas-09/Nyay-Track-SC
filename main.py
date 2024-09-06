@@ -27,13 +27,9 @@ st.write("Don't have an account? [Sign up](#)")
 
 st.markdown("""
     <style>
-    
-        /* Additional CSS for headings */
-        h1 {
-            font-size: 30px;
-            text-align: center;
-            text-transform: uppercase;
-        }
+        
+
+        
     </style>
     """, unsafe_allow_html=True)
 
