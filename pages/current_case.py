@@ -4,9 +4,6 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-from langchain_community.embeddings import SentenceTransformerEmbeddings
-
-from pages.case import update_processed_output
 
 st.set_page_config(layout="wide")
 

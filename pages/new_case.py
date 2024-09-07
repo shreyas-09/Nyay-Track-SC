@@ -4,7 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from pages.case import Case, insert_case, RelatedCase, insert_related_case, PastJudgment, insert_past_judgment
+from src.case import Case, insert_case, RelatedCase, insert_related_case, PastJudgment, insert_past_judgment
 
 st.markdown("""
 <style>
