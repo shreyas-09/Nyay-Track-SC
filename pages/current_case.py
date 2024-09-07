@@ -6,6 +6,8 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
+from pages.case import update_processed_output
+
 st.set_page_config(layout="wide")
 
 if "responseSave1" not in st.session_state:
@@ -79,6 +81,8 @@ def user_input_details(user_question):
             res = response["output_text"]
         
             styled_res = res.replace('\n', '<br>')
+            # TODO: Add processed output to relevant case_id
+            #update_processed_output(case_id=None, processed_output=styled_res)
             st.markdown(f"""
             <div style="font-size: 18px;">
                 {styled_res}
