@@ -167,14 +167,14 @@ def main():
     case_id = insert_case(case1)
 
     # Load related cases from files in the "related_cases" folder
-    related_case1 = RelatedCase('case1.txt', base_path='related_cases/')  # Replace with actual file path
-    related_case2 = RelatedCase('case2.txt', base_path='related_cases/')
+    related_case1 = RelatedCase('case1.txt', base_path='../related_cases/')  # Replace with actual file path
+    related_case2 = RelatedCase('case2.txt', base_path='../related_cases/')
     insert_related_case(related_case1, case_id)
     insert_related_case(related_case2, case_id)
 
     # Load past judgments from files in the "past_judgments" folder
-    past_judgment1 = PastJudgment('judgment_file1.txt', base_path='past_judgments/')  # Replace with actual file path
-    past_judgment2 = PastJudgment('judgment_file1.txt', base_path='past_judgments/')
+    past_judgment1 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')  # Replace with actual file path
+    past_judgment2 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')
     insert_past_judgment(past_judgment1, case_id)
     insert_past_judgment(past_judgment2, case_id)
 
