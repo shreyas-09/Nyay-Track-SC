@@ -89,7 +89,7 @@ if st.button("Process"):
         text_chunks = get_text_chunks(raw_text)
 
         get_vector_store(text_chunks)
-
+        #TODO: First save and then use case for saving embeddings
         case = Case(case_name, None, raw_text, 1, None)
         case_id = insert_case(case)
         boostrap_mockup(case_id)
