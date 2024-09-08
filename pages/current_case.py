@@ -4,7 +4,6 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-from langchain_community.embeddings import SentenceTransformerEmbeddings
 
 st.set_page_config(layout="wide")
 
@@ -79,6 +78,8 @@ def user_input_details(user_question):
             res = response["output_text"]
         
             styled_res = res.replace('\n', '<br>')
+            # TODO: Add processed output to relevant case_id
+            #update_processed_output(case_id=None, processed_output=styled_res)
             st.markdown(f"""
             <div style="font-size: 18px;">
                 {styled_res}

@@ -4,6 +4,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+from src.case import Case, insert_case, RelatedCase, insert_related_case, PastJudgment, insert_past_judgment
+
 st.markdown("""
 <style>
 .stButton > button {
@@ -55,12 +57,29 @@ def get_vector_store(text_chunks):
     vector_store.save_local("faiss_index")
 
 
+
+
 st.title("NEW CASE")
 
 case_name = st.text_input("Enter New Case Diary Number *", "")
 
 pdf_docs = st.file_uploader(
         "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
+
+
+def boostrap_mockup(case_id):
+    # Load related cases from files in the "related_cases" folder
+    related_case1 = RelatedCase('case1.txt', base_path='../related_cases/')  # Replace with actual file path
+    related_case2 = RelatedCase('case2.txt', base_path='../related_cases/')
+    insert_related_case(related_case1, case_id)
+    insert_related_case(related_case2, case_id)
+
+    # Load past judgments from files in the "past_judgments" folder
+    past_judgment1 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')  # Replace with actual file path
+    past_judgment2 = PastJudgment('judgment_file2.txt', base_path='../past_judgments/')
+    insert_past_judgment(past_judgment1, case_id)
+    insert_past_judgment(past_judgment2, case_id)
+
 
 if st.button("Process"):
     for pdf in pdf_docs:
@@ -70,8 +89,14 @@ if st.button("Process"):
         text_chunks = get_text_chunks(raw_text)
 
         get_vector_store(text_chunks)
+        #TODO: First save and then use case for saving embeddings
+        case = Case(case_name, None, raw_text, 1, None)
+        case_id = insert_case(case)
+        boostrap_mockup(case_id)
 
     st.success('Processing complete!')
     st.session_state.cases.append(case_name)
 
     st.switch_page("pages/current_case.py")
+
+
