@@ -1,10 +1,41 @@
 import sqlite3
 from datetime import datetime, timedelta
 import os
+import time
 
 
 conn = None
 cursor = None
+
+# Max retries for failed connections
+MAX_RETRIES = 3
+RETRY_DELAY = 2  # seconds
+
+
+def recreate_connection():
+    """Recreate the SQLite connection and cursor."""
+    global conn, cursor
+    if conn:
+        conn.close()
+    conn = sqlite3.connect(':memory:')  # Adjust this if you're using a file-based DB
+    cursor = conn.cursor()
+
+
+def retry_on_failure(func):
+    """Decorator to retry a function if the connection fails."""
+    def wrapper(*args, **kwargs):
+        retries = 0
+        while retries < MAX_RETRIES:
+            try:
+                return func(*args, **kwargs)
+            except sqlite3.OperationalError as e:
+                print(f"Error: {e}. Retrying {retries + 1}/{MAX_RETRIES}...")
+                retries += 1
+                recreate_connection()  # Recreate connection and cursor
+                time.sleep(RETRY_DELAY)
+        raise Exception("Max retries reached. Operation failed.")
+    return wrapper
+
 
 # Define the Case entity
 class Case:
@@ -53,11 +84,9 @@ class PastJudgment:
             data = file.read()
         return data
 
+
 def boot():
-    global conn, cursor
-    # Create an in-memory SQLite database
-    conn = sqlite3.connect(':memory:')
-    cursor = conn.cursor()
+    recreate_connection()
 
     # Create tables for cases, related cases, and past judgments
     cursor.execute('''
@@ -65,7 +94,7 @@ def boot():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             case_name TEXT NOT NULL,
             docs BLOB,
-            raw_text BLOB,  -- Change raw_text to BLOB
+            raw_text BLOB,
             user_id INTEGER,
             processed_output TEXT,
             additional_details TEXT,
@@ -95,11 +124,14 @@ def boot():
 
 
 def close_connection():
+    global conn
     if conn:
         conn.close()
 
 
-# Function to insert a case into the database
+# Retry applied to the following database-related functions
+
+@retry_on_failure
 def insert_case(case):
     cursor.execute('''
         INSERT INTO cases (case_name, docs, raw_text, user_id, processed_output, additional_details, upload_date)
@@ -110,7 +142,7 @@ def insert_case(case):
     return cursor.lastrowid  # Return the id of the inserted case
 
 
-# Function to add or update additional details of a case
+@retry_on_failure
 def update_additional_details(case_id, additional_details):
     cursor.execute('''
         UPDATE cases SET additional_details = ? WHERE id = ?
@@ -118,7 +150,7 @@ def update_additional_details(case_id, additional_details):
     conn.commit()
 
 
-# Function to add or update processed output of a case
+@retry_on_failure
 def update_processed_output(case_id, processed_output):
     cursor.execute('''
         UPDATE cases SET processed_output = ? WHERE id = ?
@@ -126,7 +158,7 @@ def update_processed_output(case_id, processed_output):
     conn.commit()
 
 
-# Function to insert a related case into the database
+@retry_on_failure
 def insert_related_case(related_case, case_id):
     cursor.execute('''
         INSERT INTO related_cases (case_id, file_name, case_data)
@@ -135,7 +167,7 @@ def insert_related_case(related_case, case_id):
     conn.commit()
 
 
-# Function to insert a past judgment into the database
+@retry_on_failure
 def insert_past_judgment(past_judgment, case_id):
     cursor.execute('''
         INSERT INTO past_judgments (case_id, file_name, judgment_data)
@@ -144,7 +176,7 @@ def insert_past_judgment(past_judgment, case_id):
     conn.commit()
 
 
-# Function to fetch cases from the last 5 days based on user_id
+@retry_on_failure
 def fetch_cases_last_5_days_by_user(user_id):
     five_days_ago = datetime.now() - timedelta(days=5)
     cursor.execute('''
@@ -153,7 +185,7 @@ def fetch_cases_last_5_days_by_user(user_id):
     return cursor.fetchall()
 
 
-# Function to fetch all related cases for a specific case
+@retry_on_failure
 def get_related_cases(case_id):
     cursor.execute('''
         SELECT * FROM related_cases WHERE case_id = ?
@@ -161,12 +193,33 @@ def get_related_cases(case_id):
     return cursor.fetchall()
 
 
-# Function to fetch all past judgments for a specific case
+@retry_on_failure
 def get_past_judgments(case_id):
     cursor.execute('''
         SELECT * FROM past_judgments WHERE case_id = ?
     ''', (case_id,))
     return cursor.fetchall()
+
+@retry_on_failure
+def get_case_by_id(case_id):
+    cursor.execute('''
+        SELECT * FROM cases WHERE id = ?
+    ''', (case_id,))
+    case = cursor.fetchone()  # Fetch a single result
+    if case:
+        case_dict = {
+            'id': case[0],
+            'case_name': case[1],
+            'docs': case[2],
+            'raw_text': case[3],
+            'user_id': case[4],
+            'processed_output': case[5],
+            'additional_details': case[6],
+            'upload_date': case[7]
+        }
+        return case_dict
+    else:
+        return None
 
 
 # Main function to drive the program
@@ -181,9 +234,11 @@ def main():
     insert_related_case(related_case1, case_id)
     insert_related_case(related_case2, case_id)
 
+    print(get_case_by_id(case_id))
+
     # Load past judgments from files in the "past_judgments" folder
     past_judgment1 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')  # Replace with actual file path
-    past_judgment2 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')
+    past_judgment2 = PastJudgment('judgment_file2.txt', base_path='../past_judgments/')
     insert_past_judgment(past_judgment1, case_id)
     insert_past_judgment(past_judgment2, case_id)
 
