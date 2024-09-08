@@ -36,22 +36,33 @@ with st.sidebar:
     st.button("Logout Account")
 
 
-def get_pdf_text(pdf_docs):
+
+def get_pdf_text(pdf_docs, progress_bar):
     text = ""
+    total_pages = sum(len(PdfReader(pdf).pages) for pdf in pdf_docs)
+    pages_processed = 0
     for pdf in pdf_docs:
         pdf_reader = PdfReader(pdf)
         for page in pdf_reader.pages:
             text += page.extract_text()
+            pages_processed += 1
+            progress_bar.progress(pages_processed / total_pages)
     return text
 
-def get_text_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size= 10000, chunk_overlap = 1000)
+
+def get_text_chunks(text, progress_bar):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
+    progress_bar.progress(1.0)  # Set progress to 100% when chunking is complete
     return chunks
 
-def get_vector_store(text_chunks):
+def get_vector_store(text_chunks, progress_bar):
     embeddings = HuggingFaceEmbeddings()
-    vector_store = FAISS.from_texts(text_chunks, embedding = embeddings)
+    total_chunks = len(text_chunks)
+    for i, chunk in enumerate(text_chunks):
+        FAISS.from_texts([chunk], embedding=embeddings)
+        progress_bar.progress((i + 1) / total_chunks)
+    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
 
 
@@ -65,11 +76,24 @@ pdf_docs = st.file_uploader(
 if st.button("Process"):
     for pdf in pdf_docs:
         st.session_state.documents.append(pdf.name)
-    with st.spinner("Processing"):
-        raw_text = get_pdf_text(pdf_docs)
-        text_chunks = get_text_chunks(raw_text)
 
-        get_vector_store(text_chunks)
+    st.subheader("Extracting text from documents...")
+    extract_progress = st.progress(0)
+    extract_status = st.empty()
+    raw_text = get_pdf_text(pdf_docs, extract_progress)
+    extract_status.success("Text extraction complete!")
+
+    st.subheader("Converting text into embeddings...")
+    chunk_progress = st.progress(0)
+    chunk_status = st.empty()
+    text_chunks = get_text_chunks(raw_text,chunk_progress)
+    chunk_status.success("Text converted to embeddings!")
+
+    st.subheader("Storing embeddings into database...")
+    data_progress = st.progress(0)
+    data_status = st.empty()
+    get_vector_store(text_chunks, chunk_progress)
+    data_status.success("Data stored!")
 
     st.success('Processing complete!')
     st.session_state.cases.append(case_name)
