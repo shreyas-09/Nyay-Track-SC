@@ -3,6 +3,9 @@ from datetime import datetime, timedelta
 import os
 
 
+conn = None
+cursor = None
+
 # Define the Case entity
 class Case:
     def __init__(self, case_name, docs, raw_text, user_id, processed_output, additional_details=None, upload_date=None):
@@ -50,44 +53,50 @@ class PastJudgment:
             data = file.read()
         return data
 
+def boot():
+    global conn, cursor
+    # Create an in-memory SQLite database
+    conn = sqlite3.connect(':memory:')
+    cursor = conn.cursor()
 
-# Create an in-memory SQLite database
-conn = sqlite3.connect(':memory:')
-cursor = conn.cursor()
+    # Create tables for cases, related cases, and past judgments
+    cursor.execute('''
+        CREATE TABLE cases (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            case_name TEXT NOT NULL,
+            docs BLOB,
+            raw_text BLOB,  -- Change raw_text to BLOB
+            user_id INTEGER,
+            processed_output TEXT,
+            additional_details TEXT,
+            upload_date TEXT
+        )
+    ''')
 
-# Create tables for cases, related cases, and past judgments
-cursor.execute('''
-    CREATE TABLE cases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_name TEXT NOT NULL,
-        docs BLOB,
-        raw_text BLOB,  -- Change raw_text to BLOB
-        user_id INTEGER,
-        processed_output TEXT,
-        additional_details TEXT,
-        upload_date TEXT
-    )
-''')
+    cursor.execute('''
+        CREATE TABLE related_cases (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            case_id INTEGER,
+            file_name TEXT,
+            case_data TEXT,
+            FOREIGN KEY (case_id) REFERENCES cases(id)
+        )
+    ''')
 
-cursor.execute('''
-    CREATE TABLE related_cases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_id INTEGER,
-        file_name TEXT,
-        case_data TEXT,
-        FOREIGN KEY (case_id) REFERENCES cases(id)
-    )
-''')
+    cursor.execute('''
+        CREATE TABLE past_judgments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            case_id INTEGER,
+            file_name TEXT,
+            judgment_data TEXT,
+            FOREIGN KEY (case_id) REFERENCES cases(id)
+        )
+    ''')
 
-cursor.execute('''
-    CREATE TABLE past_judgments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_id INTEGER,
-        file_name TEXT,
-        judgment_data TEXT,
-        FOREIGN KEY (case_id) REFERENCES cases(id)
-    )
-''')
+
+def close_connection():
+    if conn:
+        conn.close()
 
 
 # Function to insert a case into the database
@@ -204,7 +213,6 @@ def main():
 
 
 if __name__ == '__main__':
+    boot()
     main()
-
-    # Close the connection when done
-    conn.close()
+    close_connection()
