@@ -126,7 +126,7 @@ ques = "You are an expert lawyer, Identify the entities in the files uploaded an
 user_input_details_2(ques)
 
 st.write("### CHOOSE WHAT TO DO NEXT")
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(3)
 with col1:
     if(st.button("Check for Defects")):
         st.switch_page("pages/validate.py")
