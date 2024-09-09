@@ -12,6 +12,8 @@ if "responseSave1" not in st.session_state:
     st.session_state.responseSave1 = ""
 if "responseSave2" not in st.session_state:
     st.session_state.responseSave2 = ""
+if "responseSave3" not in st.session_state:
+    st.session_state.responseSave3 = ""
 
 
 st.markdown("""
@@ -61,7 +63,7 @@ def get_conversational_chain():
     return chain
 
 
-def user_input_details(user_question):
+def user_input_details_1(user_question):
     if st.session_state.responseSave1 == "":
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
@@ -91,6 +93,7 @@ def user_input_details(user_question):
             {st.session_state.responseSave1}
         </div>
         """, unsafe_allow_html=True)
+        
 
 def user_input_details_2(user_question):
     if st.session_state.responseSave2 == "":
@@ -108,25 +111,74 @@ def user_input_details_2(user_question):
                 , return_only_outputs=True)
 
             res = response["output_text"]
-            st.write(res)
-            st.session_state.responseSave2 = res
+        
+            styled_res = res.replace('\n', '<br>')
+            st.markdown(f"""
+            <div style="font-size: 18px;">
+                {styled_res}
+            </div>
+            """, unsafe_allow_html=True)
+            st.session_state.responseSave2 = styled_res
     else:
-        st.write(st.session_state.responseSave2)
+        st.markdown(f"""
+        <div style="font-size: 18px;">
+            {st.session_state.responseSave2}
+        </div>
+        """, unsafe_allow_html=True)
+
+def user_input_details_3(user_question):
+    if st.session_state.responseSave3 == "":
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
+
+            chain = get_conversational_chain()
+
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
+            st.write(res)
+            st.session_state.responseSave3 = res
+    else:
+        st.write(st.session_state.responseSave3)
 
 c = st.session_state.cases[-1]
 s= "CASE: "+c
 st.title(s)
 
+st.write("### Category of the Case")
+ques_0 = """You are an expert lawyer, Based on the files uploaded categorise the case as one of the below mentioned categories:
+1. Civil Case
+2. Criminal Case
+3. Constitutional Case
+4. Special Leave Petitions (SLP)
+5. Writ Petitions
+6. Review & Curative Petitions
+7. Advisory Juridictions
+8. Election Matters
+9. Transfer Petitions
+10. Contempt Of Court
+11. Service Matters
+
+Give only the name of the category and dont give other information also dont mention the no in start of category.
+"""
+user_input_details_1(ques_0)
+
 st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 bullet points, Use the context from the files and don’t create the context."
-user_input_details(ques)
+ques_1 = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 bullet points, Use the context from the files and don’t create the context."
+user_input_details_2(ques_1)
 
 st.write("### Entity List")
-ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Dont mention structured table format in the result"
-user_input_details_2(ques)
+ques_2 = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Dont mention structured table format in the result"
+user_input_details_3(ques_2)
 
 st.write("### CHOOSE WHAT TO DO NEXT")
-col1, col2, col3, col4 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     if(st.button("Check for Defects")):
         st.switch_page("pages/validate.py")
