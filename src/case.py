@@ -68,12 +68,12 @@ def retry_on_failure(func):
 def boot():
     # Create an in-memory SQLite database
     global conn, cursor
-    conn = sqlite3.connect(':memory:')
+    conn = sqlite3.connect('cases.db')
     cursor = conn.cursor()
 
     # Create the cases table with defects and entity_list
     cursor.execute('''
-        CREATE TABLE cases (
+        CREATE TABLE IF NOT EXISTS cases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             case_name TEXT NOT NULL,
             docs BLOB,
@@ -89,7 +89,7 @@ def boot():
 
     # Create tables for related cases and past judgments
     cursor.execute('''
-        CREATE TABLE related_cases (
+        CREATE TABLE IF NOT EXISTS related_cases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             case_id INTEGER,
             file_name TEXT,
@@ -99,7 +99,7 @@ def boot():
     ''')
 
     cursor.execute('''
-        CREATE TABLE past_judgments (
+        CREATE TABLE IF NOT EXISTS past_judgments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             case_id INTEGER,
             file_name TEXT,
