@@ -71,7 +71,8 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    if st.session_state.responseSave1 == "":
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["processed_output"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -105,10 +106,10 @@ def user_input_details(user_question):
             {case_db["processed_output"]}
         </div>
         """, unsafe_allow_html=True)
-        
 
 def user_input_details_2(user_question):
-    if st.session_state.responseSave2 == "":
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["entity_list"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -124,39 +125,16 @@ def user_input_details_2(user_question):
 
             res = response["output_text"]
             st.write(res)
-            st.session_state.responseSave2 = res
+            # st.session_state.responseSave2 = res
+            update_entity_list(st.session_state.current_case_name,res)
     else:
-        st.write(st.session_state.responseSave2)
+        st.write(case_db["entity_list"])
+
+s= "CASE: "+st.session_state.current_case_name
 
 st.title(s)
 
-st.write("### Category of the Case")
-ques_0 = """You are an expert lawyer, Based on the files uploaded categorise the case as one of the below mentioned categories:
-1. Civil Case
-2. Criminal Case
-3. Constitutional Case
-4. Special Leave Petitions (SLP)
-5. Writ Petitions
-6. Review & Curative Petitions
-7. Advisory Juridictions
-8. Election Matters
-9. Transfer Petitions
-10. Contempt Of Court
-11. Service Matters
-
-Give only the name of the category and dont give other information also dont mention the no in start of category.
-"""
-user_input_details_1(ques_0)
-
-st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
-user_input_details(ques)
-
-st.write("### Entity List")
-ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
-user_input_details_2(ques)
-
-st.write("### CHOOSE WHAT TO DO NEXT")
+# st.write("### CHOOSE WHAT TO DO NEXT")
 col1, col2, col3 = st.columns(3)
 with col1:
     if(st.button("Check for Defects")):
@@ -167,3 +145,15 @@ with col2:
 with col3:
     if(st.button("Case Documents")):
         st.switch_page("pages/uploaded_docs.py")
+
+st.markdown("---")
+
+st.write("### Summary of the Case")
+ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
+user_input_details(ques)
+
+st.markdown("---")
+
+st.write("### Entity List")
+ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
+user_input_details_2(ques)
