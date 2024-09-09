@@ -71,14 +71,32 @@ def boostrap_mockup(case_id):
     # Load related cases from files in the "related_cases" folder
     related_case1 = RelatedCase('case1.txt', base_path='../related_cases/')  # Replace with actual file path
     related_case2 = RelatedCase('case2.txt', base_path='../related_cases/')
+    related_case3 = RelatedCase('case2.txt', base_path='../related_cases/')
+    related_case4 = RelatedCase('case2.txt', base_path='../related_cases/')
+    related_case5 = RelatedCase('case5.txt', base_path='../related_cases/')
+    related_case6 = RelatedCase('case6.txt', base_path='../related_cases/')
+    related_case7 = RelatedCase('case7.txt', base_path='../related_cases/')
+
     insert_related_case(related_case1, case_id)
     insert_related_case(related_case2, case_id)
+    insert_related_case(related_case3, case_id)
+    insert_related_case(related_case4, case_id)
+    insert_related_case(related_case5, case_id)
+    insert_related_case(related_case6, case_id)
+    insert_related_case(related_case7, case_id)
 
     # Load past judgments from files in the "past_judgments" folder
     past_judgment1 = PastJudgment('judgment_file1.txt', base_path='../past_judgments/')  # Replace with actual file path
     past_judgment2 = PastJudgment('judgment_file2.txt', base_path='../past_judgments/')
+    past_judgment3 = PastJudgment('judgment_file3.txt', base_path='../past_judgments/')
+    past_judgment4 = PastJudgment('judgment_file4.txt', base_path='../past_judgments/')
+    past_judgment5 = PastJudgment('judgment_file5.txt', base_path='../past_judgments/')
+
     insert_past_judgment(past_judgment1, case_id)
     insert_past_judgment(past_judgment2, case_id)
+    insert_past_judgment(past_judgment3, case_id)
+    insert_past_judgment(past_judgment4, case_id)
+    insert_past_judgment(past_judgment5, case_id)
 
 
 if st.button("Process"):
