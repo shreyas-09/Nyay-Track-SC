@@ -35,7 +35,7 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            st.markdown(f"### {case['case_name']}")
+            st.button(f"### {case['case_name']}")
     else:
         print("No cases found for this user.")
     

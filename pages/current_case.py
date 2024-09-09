@@ -14,6 +14,9 @@ if "current_case_name" not in st.session_state:
 
 st.query_params.case_name=st.session_state.current_case_name
 
+if "responseSave3" not in st.session_state:
+    st.session_state.responseSave3 = ""
+
 
 st.markdown("""
 <style>
@@ -70,7 +73,7 @@ def get_conversational_chain():
     return chain
 
 
-def user_input_details(user_question):
+def user_input_details_1(user_question):
     case_db = get_case_by_name(st.session_state.current_case_name)
     if case_db["processed_output"] == None:
         with st.spinner("Processing"):
@@ -130,12 +133,35 @@ def user_input_details_2(user_question):
     else:
         st.write(case_db["entity_list"])
 
+def user_input_details_3(user_question):
+    if st.session_state.responseSave3 == "":
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
+
+            chain = get_conversational_chain()
+
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
+            st.write(res)
+            st.session_state.responseSave3 = res
+    else:
+        st.write(st.session_state.responseSave3)
+
+
 s= "CASE: "+st.session_state.current_case_name
 
 st.title(s)
 
 # st.write("### CHOOSE WHAT TO DO NEXT")
-col1, col2, col3 = st.columns(3)
+st.write("### CHOOSE WHAT TO DO NEXT")
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     if(st.button("Check for Defects")):
         st.switch_page("pages/validate.py")
@@ -145,15 +171,38 @@ with col2:
 with col3:
     if(st.button("Case Documents")):
         st.switch_page("pages/uploaded_docs.py")
+with col4:
+    if(st.button("Case Timeline")):
+        st.switch_page("pages/case_timeline.py")
+
+st.markdown("---")
+
+st.write("### Category of the Case")
+ques_0 = """You are an expert lawyer, Based on the files uploaded categorise the case as one of the below mentioned categories:
+1. Civil Case
+2. Criminal Case
+3. Constitutional Case
+4. Special Leave Petitions (SLP)
+5. Writ Petitions
+6. Review & Curative Petitions
+7. Advisory Juridictions
+8. Election Matters
+9. Transfer Petitions
+10. Contempt Of Court
+11. Service Matters
+
+Give only the name of the category and dont give other information also dont mention the no in start of category.
+"""
+user_input_details_3(ques_0)
 
 st.markdown("---")
 
 st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
-user_input_details(ques)
+ques_1 = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 bullet points, Use the context from the files and don’t create the context."
+user_input_details_1(ques_1)
 
 st.markdown("---")
 
 st.write("### Entity List")
-ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
-user_input_details_2(ques)
+ques_2 = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Dont mention structured table format in the result"
+user_input_details_2(ques_2)

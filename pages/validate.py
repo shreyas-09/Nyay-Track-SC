@@ -27,9 +27,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if "responseSave4" not in st.session_state:
-    st.session_state.responseSave4 = ""
-
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
@@ -44,7 +41,7 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            st.markdown(f"### {case['case_name']}")
+            st.button(f"### {case['case_name']}")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
