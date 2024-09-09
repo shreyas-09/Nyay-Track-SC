@@ -118,11 +118,11 @@ s= "CASE: "+c
 st.title(s)
 
 st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
+ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 points, Use the context from the files and don’t create the context."
 user_input_details(ques)
 
 st.write("### Entity List")
-ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
+ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Dont mention structured table format in the result"
 user_input_details_2(ques)
 
 st.write("### CHOOSE WHAT TO DO NEXT")
