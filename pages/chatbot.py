@@ -14,6 +14,7 @@ import io
 import base64
 from textwrap import wrap
 
+from src.case import get_cases_by_user_id
 
 st.markdown("""
 <style>
@@ -36,8 +37,13 @@ with st.sidebar:
     if st.button("📝 New Case"):
         st.switch_page("pages/new_case.py")
     
-    for case in st.session_state.cases:
-        st.markdown(f"### {case}")
+    # for case in st.session_state.cases:
+    #     st.markdown(f"### {case}")
+    user_cases = get_cases_by_user_id(1)
+    if user_cases:
+        for case in user_cases:
+            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            st.markdown(f"### {case['case_name']}")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
@@ -45,10 +51,10 @@ with st.sidebar:
     st.button("Help")
     st.button("Logout Account")
 
-name = st.session_state.cases[-1]
+# name = st.session_state.cases[-1]
 def generate_pdf(text):
 
-    text = "SUMMARY OF THE CASE "+name+"\n"+text
+    text = "SUMMARY OF THE CASE "+"\n"+text
     # Create a buffer to hold the PDF data
     buffer = io.BytesIO()
 

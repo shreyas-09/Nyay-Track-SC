@@ -1,8 +1,17 @@
 import streamlit as st
 
+from src.case import boot
 # Load the Nyay-Track header image
 st.image("lawyer.png", use_column_width=True)
 st.image("welcome.png", use_column_width=True)
+
+if "start" not in st.session_state:
+    st.session_state.start = 0
+
+if(st.session_state.start==0):
+    st.session_state.start = 1
+    print("Boot called")
+    boot()
 
 # Sign In form below the welcome section
 st.write("### Sign In to Your Account")
@@ -32,7 +41,8 @@ st.write("Forgot your password? [Reset it here](#)")
 st.write("Don't have an account? [Sign up](#)")
 
 # Initialize session states for cases and documents if they do not exist
-if "cases" not in st.session_state:
-    st.session_state.cases = []
-if "documents" not in st.session_state:
-    st.session_state.documents = []
+# if "cases" not in st.session_state:
+#     st.session_state.cases = []
+
+# if "documents" not in st.session_state:
+#     st.session_state.documents = []

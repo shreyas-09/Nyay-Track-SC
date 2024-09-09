@@ -4,14 +4,15 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+
+from src.case import get_cases_by_user_id, get_case_by_name, update_processed_output, update_entity_list
 
 st.set_page_config(layout="wide")
 
-if "responseSave1" not in st.session_state:
-    st.session_state.responseSave1 = ""
-if "responseSave2" not in st.session_state:
-    st.session_state.responseSave2 = ""
+if "current_case_name" not in st.session_state:
+    st.session_state.current_case_name = st.query_params["case_name"]
+
+st.query_params.case_name=st.session_state.current_case_name
 
 
 st.markdown("""
@@ -36,8 +37,16 @@ with st.sidebar:
     if st.button("📝 New Case"):
         st.switch_page("pages/new_case.py")
 
-    for case in st.session_state.cases:
-        st.markdown(f"### {case}")
+    # for case in st.session_state.cases:
+    #     st.markdown(f"### {case}")
+
+    user_cases = get_cases_by_user_id(1)
+    if user_cases:
+        for case in user_cases:
+            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            st.button(f"### {case['case_name']}")
+    else:
+        print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
@@ -62,7 +71,8 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    if st.session_state.responseSave1 == "":
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["processed_output"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -79,21 +89,27 @@ def user_input_details(user_question):
             res = response["output_text"]
         
             styled_res = res.replace('\n', '<br>')
+
+            # TODO: Add processed output to relevant case_id
+            #update_processed_output(case_id=None, processed_output=styled_res)
+
             st.markdown(f"""
             <div style="font-size: 18px;">
                 {styled_res}
             </div>
             """, unsafe_allow_html=True)
             st.session_state.responseSave1 = styled_res
+            update_processed_output(st.session_state.current_case_name,res)
     else:
         st.markdown(f"""
         <div style="font-size: 18px;">
-            {st.session_state.responseSave1}
+            {case_db["processed_output"]}
         </div>
         """, unsafe_allow_html=True)
 
 def user_input_details_2(user_question):
-    if st.session_state.responseSave2 == "":
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["entity_list"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -109,23 +125,16 @@ def user_input_details_2(user_question):
 
             res = response["output_text"]
             st.write(res)
-            st.session_state.responseSave2 = res
+            # st.session_state.responseSave2 = res
+            update_entity_list(st.session_state.current_case_name,res)
     else:
-        st.write(st.session_state.responseSave2)
+        st.write(case_db["entity_list"])
 
-c = st.session_state.cases[-1]
-s= "CASE: "+c
+s= "CASE: "+st.session_state.current_case_name
+
 st.title(s)
 
-st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
-user_input_details(ques)
-
-st.write("### Entity List")
-ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
-user_input_details_2(ques)
-
-st.write("### CHOOSE WHAT TO DO NEXT")
+# st.write("### CHOOSE WHAT TO DO NEXT")
 col1, col2, col3 = st.columns(3)
 with col1:
     if(st.button("Check for Defects")):
@@ -136,3 +145,16 @@ with col2:
 with col3:
     if(st.button("Case Documents")):
         st.switch_page("pages/uploaded_docs.py")
+
+st.markdown("---")
+
+st.write("### Summary of the Case")
+ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5, Use the context from the files and don’t create the context."
+user_input_details(ques)
+
+st.markdown("---")
+
+st.write("### Entity List")
+ques = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file."
+user_input_details_2(ques)
+

@@ -6,6 +6,13 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
+from src.case import get_cases_by_user_id, update_defects, get_case_by_name
+
+if "current_case_name" not in st.session_state:
+    st.session_state.current_case_name = st.query_params["case_name"]
+
+st.query_params.case_name=st.session_state.current_case_name
+
 st.markdown("""
 <style>
 .stButton > button {
@@ -31,8 +38,13 @@ with st.sidebar:
     if st.button("📝 New Case"):
         st.switch_page("pages/new_case.py")
 
-    for case in st.session_state.cases:
-        st.markdown(f"### {case}")
+    # for case in st.session_state.cases:
+    #     st.markdown(f"### {case}")
+    user_cases = get_cases_by_user_id(1)
+    if user_cases:
+        for case in user_cases:
+            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            st.markdown(f"### {case['case_name']}")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
@@ -57,7 +69,8 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    if st.session_state.responseSave3 == "":
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["defects"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -78,13 +91,26 @@ def user_input_details(user_question):
                 {styled_res}
             </div>
             """, unsafe_allow_html=True)
-            st.session_state.responseSave3 = styled_res
+            # st.session_state.responseSave3 = styled_res
+            update_defects(st.session_state.current_case_name,res)
     else:
         st.markdown(f"""
         <div style="font-size: 18px;">
-            {st.session_state.responseSave3}
+            {case_db["defects"]}
         </div>
         """, unsafe_allow_html=True)
+
+
+col1, col2, col3 = st.columns(3)
+# with col1:
+#     if(st.button("Check for Defects")):
+#         st.switch_page("pages/validate.py")
+with col1:
+    if(st.button("<< Back to Summary")):
+        st.switch_page("pages/current_case.py")
+with col2:
+    if(st.button("Chat about the Case")):
+        st.switch_page("pages/chatbot.py")
 
 
 st.title("CHECK FOR DEFECTS")
