@@ -20,8 +20,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if "responseSave3" not in st.session_state:
-    st.session_state.responseSave3 = ""
+if "responseSave4" not in st.session_state:
+    st.session_state.responseSave4 = ""
 
 with st.sidebar:
     st.sidebar.image("lawyer.png")
@@ -57,7 +57,7 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
-    if st.session_state.responseSave3 == "":
+    if st.session_state.responseSave4 == "":
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -66,28 +66,23 @@ def user_input_details(user_question):
 
             chain = get_conversational_chain()
 
+            
             response = chain(
                 {"input_documents":docs, "question": user_question}
                 , return_only_outputs=True)
 
             res = response["output_text"]
-        
-            styled_res = res.replace('\n', '<br>')
-            st.markdown(f"""
-            <div style="font-size: 18px;">
-                {styled_res}
-            </div>
-            """, unsafe_allow_html=True)
-            st.session_state.responseSave3 = styled_res
+            st.write(res)
+            st.session_state.responseSave4 = res
     else:
-        st.markdown(f"""
-        <div style="font-size: 18px;">
-            {st.session_state.responseSave3}
-        </div>
-        """, unsafe_allow_html=True)
+        st.write(st.session_state.responseSave4)
 
 
 st.title("CHECK FOR DEFECTS")
 
-ques = "You are an expert lawyer, Compare the files with the latest Supreme Court of India rules, Point out incompleteness in the documents if any also point out any rules which have not been followed in the files in terms of completeness."
+ques = """You are an expert lawyer, Compare the files with the latest Supreme Court of India rules, Check for issues in below mentioned categories in the files and highlight in detail with relevant examples from the file where it is not following supreme court rules: 1. Pagination Issues 2. Annexure Marking Issues 3. Formatting Issues 4. Blurred Sections
+5. Vakalatnama
+
+Also give the overall score out of 10 for each category based on severity and amount of issues
+Give the results in the form of table with column 1 as S.No, Column 2 as Category as per above mentioned categories and Column 3 as Details with examples giving all the details about the issue with clear examples from the files where issue is there and Column 4 as Notification Data which is todays date and column 5 as the score as calculated above"""
 user_input_details(ques)
