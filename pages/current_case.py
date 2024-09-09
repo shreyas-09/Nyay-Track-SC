@@ -118,7 +118,7 @@ s= "CASE: "+c
 st.title(s)
 
 st.write("### Summary of the Case")
-ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 points, Use the context from the files and don’t create the context."
+ques = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 bullet points, Use the context from the files and don’t create the context."
 user_input_details(ques)
 
 st.write("### Entity List")
@@ -136,3 +136,6 @@ with col2:
 with col3:
     if(st.button("Case Documents")):
         st.switch_page("pages/uploaded_docs.py")
+with col4:
+    if(st.button("Case Timeline")):
+        st.switch_page("pages/case_timeline.py")
