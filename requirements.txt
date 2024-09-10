@@ -9,3 +9,4 @@ faiss-cpu
 torch
 transformers
 reportlab
+streamlit-shadcn-ui

@@ -5,6 +5,7 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
+import streamlit_shadcn_ui as ui
 
 from src.case import get_cases_by_user_id, update_defects, get_case_by_name
 
@@ -20,10 +21,10 @@ col1, col2, col3 = st.columns(3)
 #     if(st.button("Check for Defects")):
 #         st.switch_page("pages/validate.py")
 with col1:
-    if(st.button("<< Back to Summary")):
+    if(ui.button("<< Back to Summary", className="bg-purple-500 text-white", key="btn_sum_1")):
         st.switch_page("pages/current_case.py")
 with col2:
-    if(st.button("Chat about the Case")):
+    if(ui.button("Chat about the Case", className="bg-purple-500 text-white", key="btn_validate_bot_again_1")):
         st.switch_page("pages/chatbot.py")
 
 st.markdown("""
@@ -38,10 +39,10 @@ st.markdown("""
         border-radius: 8px;
     }
     .main {
-        background-color: #a8d0e6;
+        background-color: #FFFFFF;
     }
     .timeline-container {
-        background-color: #a8d0e6;
+        background-color: #FFFFFF;
         position: relative;
         padding-left: 40px;
     }
@@ -63,10 +64,10 @@ st.markdown("""
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background-color: #cedde4;
+        background-color: #F0F2F6;
     }
     .timeline-content {
-        background-color: #cedde4;
+        background-color: #F0F2F6;
         border-radius: 5px;
         padding: 10px 15px;
     }
@@ -90,7 +91,7 @@ with st.sidebar:
 
     st.write("### USER NAME")
 
-    if st.button("📝 New Case"):
+    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
     # for case in st.session_state.cases:
@@ -100,13 +101,16 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            st.button(f"### {case['case_name']}")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case")
+    else:
+        print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    st.button("Settings")
-    st.button("Help")
-    st.button("Logout Account")
+    ui.button("Settings", size="sm")
+    ui.button("Help", size="sm")
+    ui.button("Logout Account", size="sm")
+
 
 def get_conversational_chain():
     prompt_template = """

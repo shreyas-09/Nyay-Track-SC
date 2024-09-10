@@ -4,6 +4,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
+import streamlit_shadcn_ui as ui
 
 from src.case import get_cases_by_user_id, get_case_by_name, update_processed_output, update_entity_list
 
@@ -37,7 +38,7 @@ with st.sidebar:
 
     st.write("### USER NAME")
 
-    if st.button("📝 New Case"):
+    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
     # for case in st.session_state.cases:
@@ -47,15 +48,15 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            st.button(f"### {case['case_name']}")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case")
     else:
         print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    st.button("Settings")
-    st.button("Help")
-    st.button("Logout Account")
+    ui.button("Settings", size="sm")
+    ui.button("Help", size="sm")
+    ui.button("Logout Account", size="sm")
 
 def get_conversational_chain():
     prompt_template = """
@@ -161,18 +162,15 @@ st.title(s)
 
 # st.write("### CHOOSE WHAT TO DO NEXT")
 st.write("### CHOOSE WHAT TO DO NEXT")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 with col1:
-    if(st.button("Check for Defects")):
+    if ui.button("Check for Defects", className="bg-purple-500 text-white", key="btn_validate"):
         st.switch_page("pages/validate.py")
 with col2:
-    if(st.button("Chat about the Case")):
+    if(ui.button("Chat about the Case", className="bg-purple-500 text-white", key="btn_bot")):
         st.switch_page("pages/chatbot.py")
 with col3:
-    if(st.button("Case Documents")):
-        st.switch_page("pages/uploaded_docs.py")
-with col4:
-    if(st.button("Case Timeline")):
+    if(ui.button("Case Timeline", className="bg-purple-500 text-white", key="btn_time")):
         st.switch_page("pages/case_timeline.py")
 
 st.markdown("---")
