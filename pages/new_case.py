@@ -45,7 +45,7 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case4")
     else:
         print("No cases found for this user.")
     

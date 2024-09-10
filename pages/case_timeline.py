@@ -91,7 +91,7 @@ with st.sidebar:
 
     st.write("### USER NAME")
 
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", variant="destructive", key="btn_new_case1"):
         st.switch_page("pages/new_case.py")
 
     # for case in st.session_state.cases:

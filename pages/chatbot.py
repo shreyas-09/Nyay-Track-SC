@@ -140,7 +140,7 @@ def get_conversational_chain():
 if "totalResponse" not in st.session_state:
     st.session_state.totalResponse = ""
 
-if ui.button("Generate Key Points", className="bg-orange-500 text-white", key="btn_gen"):
+if ui.button("Generate Key Points", className="bg-orange-500 text-white", key="btn_gen2"):
     with st.spinner("Processing"):
         ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
         embeddings = HuggingFaceEmbeddings()
