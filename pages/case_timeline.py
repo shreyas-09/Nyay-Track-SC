@@ -8,8 +8,9 @@ from langchain_community.embeddings import SentenceTransformerEmbeddings
 import streamlit_shadcn_ui as ui
 
 from src.case import get_cases_by_user_id, update_defects, get_case_by_name
-
+from src.case import boot
 st.set_page_config(page_title="Timeline Of Events", layout="wide")
+boot()
 
 if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = st.query_params["case_name"]
@@ -29,15 +30,6 @@ with col2:
 
 st.markdown("""
 <style>
-    .stButton > button {
-        padding: 15px 30px;
-        font-size: 20px;
-        font-weight: bold;
-        background-color: #F16556;
-        color: white;
-        border: none;
-        border-radius: 8px;
-    }
     .main {
         background-color: #FFFFFF;
     }
@@ -91,17 +83,19 @@ with st.sidebar:
 
     st.write("### USER NAME")
 
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case1"):
+    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
     # for case in st.session_state.cases:
     #     st.markdown(f"### {case}")
-
+    boot()
     user_cases = get_cases_by_user_id(1)
+    x = 1
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            x+=1
     else:
         print("No cases found for this user.")
     

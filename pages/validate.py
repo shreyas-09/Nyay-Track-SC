@@ -9,24 +9,14 @@ import streamlit_shadcn_ui as ui
 
 from src.case import get_cases_by_user_id, update_defects, get_case_by_name
 
+from src.case import boot
+boot()
+
 if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = st.query_params["case_name"]
 
 st.query_params.case_name=st.session_state.current_case_name
 
-st.markdown("""
-<style>
-.stButton > button {
-    padding: 15px 30px;
-    font-size: 20px;
-    font-weight: bold;
-    background-color: #F16556;
-    color: white;
-    border: none;
-    border-radius: 8px;
-}
-</style>
-""", unsafe_allow_html=True)
 
 with st.sidebar:
     st.sidebar.image("lawyer.png")
@@ -38,12 +28,14 @@ with st.sidebar:
 
     # for case in st.session_state.cases:
     #     st.markdown(f"### {case}")
-
+    boot()
     user_cases = get_cases_by_user_id(1)
+    x = 1
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case6")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            x+=1
     else:
         print("No cases found for this user.")
     
@@ -70,6 +62,7 @@ def get_conversational_chain():
 
 
 def user_input_details(user_question):
+    boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
     if case_db["defects"] == None:
         with st.spinner("Processing"):

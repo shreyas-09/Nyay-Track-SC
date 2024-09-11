@@ -5,20 +5,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 import streamlit_shadcn_ui as ui
 from src.case import Case, insert_case, RelatedCase, insert_related_case, PastJudgment, insert_past_judgment, get_cases_by_user_id
-
-st.markdown("""
-<style>
-.stButton > button {
-    padding: 15px 30px;
-    font-size: 20px;
-    font-weight: bold;
-    background-color: #F16556;
-    color: white;
-    border: none;
-    border-radius: 8px;
-}
-</style>
-""", unsafe_allow_html=True)
+from src.case import boot
+boot()
 
 st.markdown(
     """
@@ -40,12 +28,14 @@ with st.sidebar:
 
     # for case in st.session_state.cases:
     #     st.markdown(f"### {case}")
-
+    boot()
     user_cases = get_cases_by_user_id(1)
+    x = 1
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case4")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            x+=1
     else:
         print("No cases found for this user.")
     
@@ -148,11 +138,11 @@ if ui.button("Process", className="bg-green-500 text-white", key="btn_process"):
     data_status = st.empty()
     get_vector_store(text_chunks, data_progress)
     # data_status.success("Data stored!")
-
+    boot()
     #TODO: First save and then use case for saving embeddings
     case = Case(case_name, None, raw_text, 1, None)
     case_id = insert_case(case)
-    boostrap_mockup(case_id)
+    boostrap_mockup(case_name)
 
     st.success('Processing complete!')
 

@@ -8,8 +8,10 @@ import streamlit_shadcn_ui as ui
 
 from src.case import get_cases_by_user_id, get_case_by_name, update_processed_output, update_entity_list
 
-st.set_page_config(layout="wide")
+from src.case import boot
 
+st.set_page_config(layout="wide")
+boot()
 if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = st.query_params["case_name"]
 
@@ -18,20 +20,6 @@ st.query_params.case_name=st.session_state.current_case_name
 if "responseSave3" not in st.session_state:
     st.session_state.responseSave3 = ""
 
-
-st.markdown("""
-<style>
-.stButton > button {
-    padding: 15px 30px;
-    font-size: 20px;
-    font-weight: bold;
-    background-color: #F16556;
-    color: white;
-    border: none;
-    border-radius: 8px;
-}
-</style>
-""", unsafe_allow_html=True)
 
 with st.sidebar:
     st.sidebar.image("lawyer.png")
@@ -43,12 +31,14 @@ with st.sidebar:
 
     # for case in st.session_state.cases:
     #     st.markdown(f"### {case}")
-
+    boot()
     user_cases = get_cases_by_user_id(1)
+    x = 1
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case3")
+            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            x+=1
     else:
         print("No cases found for this user.")
     
@@ -104,6 +94,7 @@ def convert_bullets_to_html(text):
     return "\n".join(html_lines)
 
 def user_input_details_1(user_question):
+    boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
     if case_db["processed_output"] == None:
         with st.spinner("Processing"):
@@ -146,6 +137,7 @@ def user_input_details_1(user_question):
         """, unsafe_allow_html=True)
 
 def user_input_details_2(user_question):
+    boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
     if case_db["entity_list"] == None:
         with st.spinner("Processing"):
@@ -195,7 +187,6 @@ s= "CASE: "+st.session_state.current_case_name
 st.title(s)
 
 # st.write("### CHOOSE WHAT TO DO NEXT")
-st.write("### CHOOSE WHAT TO DO NEXT")
 col1, col2, col3 = st.columns(3)
 with col1:
     if ui.button("Check for Defects", className="bg-purple-500 text-white", key="btn_validate"):
@@ -206,6 +197,14 @@ with col2:
 with col3:
     if(ui.button("Case Timeline", className="bg-purple-500 text-white", key="btn_time")):
         st.switch_page("pages/case_timeline.py")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    if ui.button("Related Cases", className="bg-purple-500 text-white", key="btn_related_cases"):
+        st.switch_page("pages/related_cases.py")
+with col2:
+    if(ui.button("Past Judgments", className="bg-purple-500 text-white", key="btn_past_judgments")):
+        st.switch_page("pages/past_judgments.py")
 
 st.markdown("---")
 
