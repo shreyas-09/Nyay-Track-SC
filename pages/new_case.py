@@ -44,7 +44,7 @@ with st.sidebar:
     user_cases = get_cases_by_user_id(1)
     if user_cases:
         for case in user_cases:
-            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
             ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case4")
     else:
         print("No cases found for this user.")
@@ -132,19 +132,19 @@ if ui.button("Process", className="bg-green-500 text-white", key="btn_process"):
     #     st.session_state.documents.append(pdf.name)
 
     # st.subheader("Extracting text from documents...")
-    extract_progress = st.progress(0, "Extracting text from documents...")
+    extract_progress = st.progress(0, "Taking text out of documents...")
     extract_status = st.empty()
     raw_text = get_pdf_text(pdf_docs, extract_progress)
     # extract_status.success("Text extraction complete!")
 
     # st.subheader("Converting text into embeddings...")
-    chunk_progress = st.progress(0, "Converting text into embeddings...")
+    chunk_progress = st.progress(0, "Changing the text into data representations...")
     chunk_status = st.empty()
     text_chunks = get_text_chunks(raw_text,chunk_progress)
     # chunk_status.success("Text converted to embeddings!")
 
     # st.subheader("Storing embeddings into database...")
-    data_progress = st.progress(0, "Storing embeddings into database...")
+    data_progress = st.progress(0, "Saving the data representations in a database...")
     data_status = st.empty()
     get_vector_store(text_chunks, data_progress)
     # data_status.success("Data stored!")

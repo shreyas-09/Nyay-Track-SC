@@ -42,7 +42,7 @@ with st.sidebar:
     user_cases = get_cases_by_user_id(1)
     if user_cases:
         for case in user_cases:
-            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
             ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case6")
     else:
         print("No cases found for this user.")
@@ -87,19 +87,11 @@ def user_input_details(user_question):
 
             res = response["output_text"]
         
-            st.markdown(f"""
-            <div style="font-size: 18px;">
-                {res}
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(res)
             # st.session_state.responseSave3 = styled_res
             update_defects(st.session_state.current_case_name,res)
     else:
-        st.markdown(f"""
-        <div style="font-size: 18px;">
-            {case_db["defects"]}
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(case_db["defects"])
 
 
 col1, col2, col3 = st.columns(3)

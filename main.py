@@ -10,7 +10,7 @@ if "start" not in st.session_state:
 
 if(st.session_state.start==0):
     st.session_state.start = 1
-    print("Boot called")
+    # print("Boot called")
     boot()
 
 # Sign In form below the welcome section

@@ -100,7 +100,7 @@ with st.sidebar:
     user_cases = get_cases_by_user_id(1)
     if user_cases:
         for case in user_cases:
-            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
             ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case")
     else:
         print("No cases found for this user.")
@@ -183,8 +183,8 @@ st.markdown('<div class="timeline-container">', unsafe_allow_html=True)
 st.markdown('<div class="timeline-line"></div>', unsafe_allow_html=True)
 
 if timeline_data is not None:
-    print(timeline_data)
-    print("&&&&&&&")
+    # print(timeline_data)
+    # print("&&&&&&&")
     arr = []
     s = ""
     pick = False

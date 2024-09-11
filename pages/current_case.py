@@ -47,7 +47,7 @@ with st.sidebar:
     user_cases = get_cases_by_user_id(1)
     if user_cases:
         for case in user_cases:
-            print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
+            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
             ui.button(f"📑 {case['case_name']}", variant="outline", key="btn_case3")
     else:
         print("No cases found for this user.")
@@ -73,6 +73,35 @@ def get_conversational_chain():
     chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
     return chain
 
+def convert_bold_to_html(text):
+    parts = text.split("**")
+    for i in range(len(parts)):
+        if i % 2 == 1:
+            parts[i] = f"<strong>{parts[i]}</strong>"
+    return "".join(parts)
+
+def convert_bullets_to_html(text):
+    lines = text.split("\n") 
+    html_lines = []
+    in_list = False
+    
+    for line in lines:
+        if line.startswith("* "):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            line_content = line[2:] 
+            html_lines.append(f"<li>{line_content}</li>")
+        else:
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            html_lines.append(line)
+
+    if in_list:
+        html_lines.append("</ul>")
+
+    return "\n".join(html_lines)
 
 def user_input_details_1(user_question):
     case_db = get_case_by_name(st.session_state.current_case_name)
@@ -91,19 +120,24 @@ def user_input_details_1(user_question):
                 , return_only_outputs=True)
 
             res = response["output_text"]
-        
+            # print(res)
             styled_res = res.replace('\n', '<br>')
+            # print(styled_res)
+            # styled_res = "**bold hua kya**"+styled_res
+            # styled_res = "* point aaya kya"+styled_res
+            styled_res = convert_bold_to_html(styled_res)
+            styled_res = convert_bullets_to_html(styled_res)
 
             # TODO: Add processed output to relevant case_id
             #update_processed_output(case_id=None, processed_output=styled_res)
-
+            
             st.markdown(f"""
             <div style="font-size: 18px;">
                 {styled_res}
             </div>
             """, unsafe_allow_html=True)
-            st.session_state.responseSave1 = styled_res
-            update_processed_output(st.session_state.current_case_name,res)
+            # st.session_state.responseSave1 = styled_res
+            update_processed_output(st.session_state.current_case_name,styled_res)
     else:
         st.markdown(f"""
         <div style="font-size: 18px;">
