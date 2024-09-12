@@ -68,7 +68,7 @@ def retry_on_failure(func):
 def boot():
     # Create an in-memory SQLite database
     global conn, cursor
-    conn = sqlite3.connect('/tmp/cases.db', check_same_thread = False)
+    conn = sqlite3.connect('cases.db', check_same_thread = False)
     # conn = sqlite3.connect(':memory:', check_same_thread = False)
     
     cursor = conn.cursor()

@@ -22,10 +22,10 @@ col1, col2, col3 = st.columns(3)
 #     if(st.button("Check for Defects")):
 #         st.switch_page("pages/validate.py")
 with col1:
-    if(ui.button("<< Back to Summary", className="bg-purple-500 text-white", key="btn_sum_1")):
+    if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_1")):
         st.switch_page("pages/current_case.py")
 with col2:
-    if(ui.button("Chat about the Case", className="bg-purple-500 text-white", key="btn_validate_bot_again_1")):
+    if(ui.button("Chat about the Case", className="bg-gray-500 text-white", key="btn_validate_bot_again_1")):
         st.switch_page("pages/chatbot.py")
 
 st.markdown("""
@@ -94,16 +94,19 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
+                # print("yo")
+                st.session_state.current_case_name = case['case_name']
+                st.switch_page("pages/current_case.py")
             x+=1
     else:
         print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings", size="sm")
-    ui.button("Help", size="sm")
-    ui.button("Logout Account", size="sm")
+    ui.button("Settings ⚙️", className="bg-gray-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
 
 
 def get_conversational_chain():
@@ -122,26 +125,26 @@ def get_conversational_chain():
     return chain
 
 def user_input_details(user_question):
-    if st.session_state.responseSave5 == "":
-        with st.spinner("Processing"):
-            embeddings = HuggingFaceEmbeddings()
-            
-            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-            docs = new_db.similarity_search(user_question)
+    # if st.session_state.responseSave5 == "":
+    with st.spinner("Processing"):
+        embeddings = HuggingFaceEmbeddings()
+        
+        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+        docs = new_db.similarity_search(user_question)
 
-            chain = get_conversational_chain()
+        chain = get_conversational_chain()
 
-            
-            response = chain(
-                {"input_documents":docs, "question": user_question}
-                , return_only_outputs=True)
+        
+        response = chain(
+            {"input_documents":docs, "question": user_question}
+            , return_only_outputs=True)
 
-            res = response["output_text"]
-            # st.write(res)
-            st.session_state.responseSave5 = res
-            return res
-    else:
-        return st.session_state.responseSave5
+        res = response["output_text"]
+        # st.write(res)
+        # st.session_state.responseSave5 = res
+        return res
+    # else:
+    #     return st.session_state.responseSave5
 
 ques = """You are an expert analyst, Compare the files uploaded and extract information to provide the case timelines with date and details in the below format:
 "

@@ -34,16 +34,19 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
+                # print("yo")
+                st.session_state.current_case_name = case['case_name']
+                st.switch_page("pages/current_case.py")
             x+=1
     else:
         print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings", size="sm")
-    ui.button("Help", size="sm")
-    ui.button("Logout Account", size="sm")
+    ui.button("Settings ⚙️", className="bg-gray-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
 
 
 

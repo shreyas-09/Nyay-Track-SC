@@ -38,9 +38,9 @@ with st.sidebar:
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings", size="sm")
-    ui.button("Help", size="sm")
-    ui.button("Logout Account", size="sm")
+    ui.button("Settings", className="bg-gray-500 text-white", size="sm")
+    ui.button("Help", className="bg-gray-500 text-white", size="sm")
+    ui.button("Logout Account", className="bg-gray-500 text-white", size="sm")
     
 st.title("UPLOADED DOCUMENTS")
 

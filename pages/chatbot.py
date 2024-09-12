@@ -17,8 +17,14 @@ from textwrap import wrap
 
 from src.case import get_cases_by_user_id
 from src.case import boot
+
+st.set_page_config(layout="wide")
 boot()
 
+if "current_case_name" not in st.session_state:
+    st.session_state.current_case_name = st.query_params["case_name"]
+
+st.query_params.case_name=st.session_state.current_case_name
 
 with st.sidebar:
     st.sidebar.image("lawyer.png")
@@ -36,27 +42,30 @@ with st.sidebar:
     if user_cases:
         for case in user_cases:
             # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            ui.button(f"📑 {case['case_name']}", variant="outline", key = f"ck{x}")
+            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
+                # print("yo")
+                st.session_state.current_case_name = case['case_name']
+                st.switch_page("pages/current_case.py")
             x+=1
     else:
         print("No cases found for this user.")
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings", size="sm")
-    ui.button("Help", size="sm")
-    ui.button("Logout Account", size="sm")
+    ui.button("Settings ⚙️", className="bg-gray-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
 
-col1, col2, col3 = st.columns(3)
+# col1, col2, col3 = st.columns(3)
 # with col1:
 #     if(st.button("Check for Defects")):
 #         st.switch_page("pages/validate.py")
-with col1:
-    if(ui.button("<< Back to Summary", className="bg-purple-500 text-white", key="btn_sum_2")):
-        st.switch_page("pages/current_case.py")
-with col2:
-    if(ui.button("Check Defects", className="bg-purple-500 text-white", key="btn_validate_bot_again_2")):
-        st.switch_page("pages/validate.py")
+# with col1:
+#     if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_2")):
+#         st.switch_page("pages/current_case.py")
+# with col2:
+#     if(ui.button("Check Defects", className="bg-gray-500 text-white", key="btn_validate_bot_again_2")):
+#         st.switch_page("pages/validate.py")
 
 # name = st.session_state.cases[-1]
 def generate_pdf(text):
@@ -131,23 +140,23 @@ def get_conversational_chain():
 if "totalResponse" not in st.session_state:
     st.session_state.totalResponse = ""
 
-if ui.button("Generate Key Points", className="bg-orange-500 text-white", key="btn_gen2"):
-    with st.spinner("Processing"):
-        ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
-        embeddings = HuggingFaceEmbeddings()
+# if ui.button("Export PDF of Chat", className="bg-red-500 text-white", key="btn_gen2"):
+#     with st.spinner("Processing"):
+#         ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
+#         embeddings = HuggingFaceEmbeddings()
         
-        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(ques)
-        chain = get_conversational_chain()
+#         new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+#         docs = new_db.similarity_search(ques)
+#         chain = get_conversational_chain()
 
-        response = chain(
-            {"input_documents":docs, "question": ques}
-            , return_only_outputs=True)
+#         response = chain(
+#             {"input_documents":docs, "question": ques}
+#             , return_only_outputs=True)
 
-        res = response["output_text"]
-        pdf_buffer = generate_pdf(res)
+#         res = response["output_text"]
+#         pdf_buffer = generate_pdf(res)
 
-        create_download_link(pdf_buffer)
+#         create_download_link(pdf_buffer)
     
 
 
@@ -202,13 +211,59 @@ st.markdown("""
     </script>
     """, unsafe_allow_html=True)
 
-# React to user input
-if prompt := st.chat_input("Ask your question"):
-    # Display user message in chat message container
-    st.chat_message("user").markdown(prompt)
-    
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Call the function to get the assistant's response
+# st.session_state.pills_index = None
+# st.session_state.chosen = st.pills("Query suggestions:", st.session_state.suggestions_list, st.session_state.suggestions_icons, index=st.session_state.pills_index)
+# React to user input
+
+if "chosen" not in st.session_state:
+    st.session_state.chosen = ""
+# if "me" not in st.session_state:
+#     st.session_state.me = 0
+
+# print(st.session_state.chosen)
+
+
+col1, col2, col3,b,c,d,e = st.columns(7)
+with col1:
+    if ui.button("Give Key Points", className="bg-gray-500 text-white rounded-full text-sm", size="sm", key="pb1"):
+        st.session_state.chosen = "Give me Key Points about the case"
+with col2:
+    if ui.button("People Involved", className="bg-gray-500 text-white rounded-full text-sm", size="sm", key = "pb2"):
+        st.session_state.chosen = "List people involved in this case"
+with col3:
+    if ui.button("Important Dates", className="bg-gray-500 text-white rounded-full text-sm", size="sm", key = "pb3"):
+        st.session_state.chosen = "Give me important dates with their description."
+with e:
+    if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_2")):
+        st.switch_page("pages/current_case.py")
+with d:
+    if ui.button("Export PDF of Chat", className="bg-red-500 text-white", key="btn_gen2"):
+        with st.spinner("Processing"):
+            ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(ques)
+            chain = get_conversational_chain()
+
+            response = chain(
+                {"input_documents":docs, "question": ques}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
+            pdf_buffer = generate_pdf(res)
+
+            create_download_link(pdf_buffer)
+
+if prompt := st.chat_input("Ask your question"):
+    st.chat_message("user").markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
     user_input(prompt)
+    st.rerun()
+elif st.session_state.chosen != "":
+    st.chat_message("user").markdown(st.session_state.chosen)
+    st.session_state.messages.append({"role": "user", "content": st.session_state.chosen})
+    user_input(st.session_state.chosen)
+    st.session_state.chosen = ""
+    st.rerun()
