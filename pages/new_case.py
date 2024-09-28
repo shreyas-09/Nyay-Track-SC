@@ -6,6 +6,9 @@ from langchain_community.vectorstores import FAISS
 import streamlit_shadcn_ui as ui
 from src.case import Case, insert_case, RelatedCase, insert_related_case, PastJudgment, insert_past_judgment, get_cases_by_user_id
 from src.case import boot
+
+st.set_page_config(layout="wide")
+
 boot()
 
 st.markdown(
@@ -18,24 +21,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
-    st.write("### USER NAME")
-
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
-    # for case in st.session_state.cases:
-    #     st.markdown(f"### {case}")
+    st.title("Case History")
     boot()
     user_cases = get_cases_by_user_id(1)
     x = 1
     if user_cases:
         for case in user_cases:
-            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
-                # print("yo")
+            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -59,7 +58,7 @@ def get_pdf_text(pdf_docs, progress_bar):
         for page in pdf_reader.pages:
             text += page.extract_text()
             pages_processed += 1
-            progress_bar.progress(pages_processed / total_pages, "Extracting text from documents...")
+            progress_bar.progress(pages_processed / total_pages, "Taking text out of documents...")
     return text
 
 
@@ -74,7 +73,7 @@ def get_vector_store(text_chunks, progress_bar):
     total_chunks = len(text_chunks)
     for i, chunk in enumerate(text_chunks):
         FAISS.from_texts([chunk], embedding=embeddings)
-        progress_bar.progress((i + 1) / total_chunks, "Storing embeddings into database...")
+        progress_bar.progress((i + 1) / total_chunks, "Saving the data representations in a database...")
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
 
@@ -120,7 +119,7 @@ def boostrap_mockup(case_id):
 if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = ""
 
-if ui.button("Process", className="bg-green-500 text-white", key="btn_process"):
+if ui.button("Process", className="bg-green-600 text-white", key="btn_process"):
     # for pdf in pdf_docs:
     #     st.session_state.documents.append(pdf.name)
 

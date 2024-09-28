@@ -22,58 +22,15 @@ col1, col2, col3 = st.columns(3)
 #     if(st.button("Check for Defects")):
 #         st.switch_page("pages/validate.py")
 with col1:
-    if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_1")):
+    if(ui.button("<< Back to Summary", className="bg-gray-600 text-white", key="btn_sum_1")):
         st.switch_page("pages/current_case.py")
 with col2:
-    if(ui.button("Chat about the Case", className="bg-gray-500 text-white", key="btn_validate_bot_again_1")):
+    if(ui.button("Chat about the Case", className="bg-gray-600 text-white", key="btn_validate_bot_again_1")):
         st.switch_page("pages/chatbot.py")
 
-st.markdown("""
-<style>
-    .main {
-        background-color: #FFFFFF;
-    }
-    .timeline-container {
-        background-color: #FFFFFF;
-        position: relative;
-        padding-left: 40px;
-    }
-    .timeline-line {
-        position: absolute;
-        left: 10px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background-color: #4A4A4A;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 20px;timeline-item
-    }
-    .timeline-dot {
-        position: absolute;
-        left: -36px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #F0F2F6;
-    }
-    .timeline-content {
-        background-color: #F0F2F6;
-        border-radius: 5px;
-        padding: 10px 15px;
-    }
-    .timeline-date {
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-    .timeline-text {
-        font-size: 14px;
-    }
-</style>
-""", unsafe_allow_html=True)
 
-st.markdown("<h3>The following timeline of events has been extracted from the files.</h3>", unsafe_allow_html=True)
+
+# st.markdown("<h3>The following timeline of events has been extracted from the files.</h3>", unsafe_allow_html=True)
 
 if "responseSave5" not in st.session_state:
     st.session_state.responseSave5 = ""
@@ -81,21 +38,16 @@ if "responseSave5" not in st.session_state:
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
-    st.write("### USER NAME")
-
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
-    # for case in st.session_state.cases:
-    #     st.markdown(f"### {case}")
+    st.title("Case History")
     boot()
     user_cases = get_cases_by_user_id(1)
     x = 1
     if user_cases:
         for case in user_cases:
-            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
-                # print("yo")
+            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -179,38 +131,140 @@ timeline_data = text_0
 st.markdown('<div class="timeline-container">', unsafe_allow_html=True)
 st.markdown('<div class="timeline-line"></div>', unsafe_allow_html=True)
 
+
+timeline_css = """
+<style>
+    .timeline {
+        position: relative;
+        margin: 0 auto;
+        padding: 20px 0;
+        width: 100%;
+    }
+    .container {
+        padding: 10px 40px;
+        position: relative;
+        background-color: inherit;
+        width: 100%;
+    }
+    .container::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        background-color: #ccc;
+        top: 0;
+        bottom: 0;
+        left: 30px;
+        margin-left: -3px;
+    }
+    .container.completed::after {
+        background-color: #7F1D1D;
+    }
+    .dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #bbb;
+        border-radius: 50%;
+        top: 15px;
+        left: 20px;
+    }
+    .container.completed .dot {
+        background-color: #7F1D1D;
+    }
+    .content {
+    padding: 30px; /* Increased padding for more space */
+    background: #f7f7f7; /* Light grey background for a softer look */
+    position: relative;
+    border-radius: 12px; /* Softer corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Enhanced shadow for depth */
+    border: 1px solid #e0e0e0; /* Light grey border for definition */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effect */
+}
+
+.content:hover {
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+}
+
+    .date {
+        font-size: 14px;
+        color: grey;
+    }
+</style>
+"""
+
+
+import json
 if timeline_data is not None:
     # print(timeline_data)
-    # print("&&&&&&&")
-    arr = []
-    s = ""
-    pick = False
-    for i in range(len(timeline_data)):
-        if timeline_data[i] == '\"':
-            if pick == False:
-                pick=True
-            else:
-                pick = False
-                # print(s)
-                arr.append(s)
-                s=""
-        else:
-            if pick:
-                s+=timeline_data[i]
-    I = 0
-    while (I+3)<len(arr):
+    # # print("&&&&&&&")
+    # arr = []
+    # s = ""
+    # pick = False
+    # for i in range(len(timeline_data)):
+    #     if timeline_data[i] == '\"':
+    #         if pick == False:
+    #             pick=True
+    #         else:
+    #             pick = False
+    #             # print(s)
+    #             arr.append(s)
+    #             s=""
+    #     else:
+    #         if pick:
+    #             s+=timeline_data[i]
+    # I = 0
+    # while (I+3)<len(arr):
+    #     st.markdown(f"""
+    #     <div class="timeline-item">
+    #         <div class="timeline-dot"></div>
+    #         <div class="timeline-content">
+    #             <div class="timeline-text">{arr[I+1]}</div>
+    #             <div class="timeline-text">{arr[I+3]}</div>
+    #         </div>
+    #     </div>
+    #     """, unsafe_allow_html=True)
+    #     I+=4
+
+
+    stages = json.loads(timeline_data)
+    # print(stages)
+
+    # from datetime import datetime
+
+    # # Streamlit layout for timeline component
+    st.title("Case Timeline")
+
+    # # Dynamically create the timeline
+    # for stage in stages:
+        
+    #     st.markdown(f"### {stage['date']}")
+    #     st.write(f"{stage['content']}")
+    #     st.markdown('<hr style="border:1px solid green">', unsafe_allow_html=True)
+
+    st.markdown(timeline_css, unsafe_allow_html=True)
+
+    # Create the timeline
+    st.markdown('<div class="timeline">', unsafe_allow_html=True)
+
+    for item in stages:
+        # status_class = "completed" if item["complete"] else ""
         st.markdown(f"""
-        <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-                <div class="timeline-text">{arr[I+1]}</div>
-                <div class="timeline-text">{arr[I+3]}</div>
+            <div class="container completed">
+                <div class="dot"></div>
+                <div class="content">
+                    <h4>{item["date"]}</h4>
+                    <p>{item["content"]}</p>
+                </div>
             </div>
-        </div>
         """, unsafe_allow_html=True)
-        I+=4
+
+    st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.write("No timeline data available.")
 
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+
+

@@ -1,7 +1,11 @@
 import streamlit as st
 
 from src.case import boot
+
+st.set_page_config(layout="centered")
 boot()
+
+
 # Load the Nyay-Track header image
 st.image("lawyer.png", use_column_width=True)
 st.image("welcome.png", use_column_width=True)

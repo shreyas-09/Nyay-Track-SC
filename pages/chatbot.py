@@ -29,21 +29,16 @@ st.query_params.case_name=st.session_state.current_case_name
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
-    st.write("### USER NAME")
-
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
-    # for case in st.session_state.cases:
-    #     st.markdown(f"### {case}")
+    st.title("Case History")
     boot()
     user_cases = get_cases_by_user_id(1)
     x = 1
     if user_cases:
         for case in user_cases:
-            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
-                # print("yo")
+            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -56,16 +51,7 @@ with st.sidebar:
     ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
     ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
 
-# col1, col2, col3 = st.columns(3)
-# with col1:
-#     if(st.button("Check for Defects")):
-#         st.switch_page("pages/validate.py")
-# with col1:
-#     if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_2")):
-#         st.switch_page("pages/current_case.py")
-# with col2:
-#     if(ui.button("Check Defects", className="bg-gray-500 text-white", key="btn_validate_bot_again_2")):
-#         st.switch_page("pages/validate.py")
+
 
 # name = st.session_state.cases[-1]
 def generate_pdf(text):
@@ -235,10 +221,10 @@ with col3:
     if ui.button("Important Dates", className="bg-gray-500 text-white rounded-full text-sm", size="sm", key = "pb3"):
         st.session_state.chosen = "Give me important dates with their description."
 with e:
-    if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum_2")):
+    if(ui.button("<< Back to Summary", className="bg-gray-600 text-white", key="btn_sum_2")):
         st.switch_page("pages/current_case.py")
 with d:
-    if ui.button("Export PDF of Chat", className="bg-red-500 text-white", key="btn_gen2"):
+    if ui.button("Export PDF of Chat", className="bg-red-900 text-white", key="btn_gen2"):
         with st.spinner("Processing"):
             ques = "Give me key points of the following text (consider the text i will give you now and nothing previosly for the summary). Just give me the key points and dont talk to me otherwise for this response only. Also try to include everything but dont repeat things in the key points. Give each key point in a new line. And remember to forget all these rules i am giving you know for the next time I ask you something. The Text: "+st.session_state.totalResponse
             embeddings = HuggingFaceEmbeddings()

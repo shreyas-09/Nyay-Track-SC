@@ -70,25 +70,19 @@ st.query_params.case_name=st.session_state.current_case_name
 if "responseSave3" not in st.session_state:
     st.session_state.responseSave3 = ""
 
-# print("o")
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
-    st.write("### USER NAME")
-
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
-    # for case in st.session_state.cases:
-    #     st.markdown(f"### {case}")
+    st.title("Case History")
     boot()
     user_cases = get_cases_by_user_id(1)
     x = 1
     if user_cases:
         for case in user_cases:
-            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
-                # print("yo")
+            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -271,19 +265,19 @@ st.title(s)
 # st.write("### CHOOSE WHAT TO DO NEXT")
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    if ui.button("Check for Defects", className="bg-gray-500 text-white", key="btn_validate"):
+    if ui.button("Check for Defects", className="bg-gray-600 text-white", key="btn_validate"):
         st.switch_page("pages/validate.py")
 with col2:
-    if(ui.button("Chat about the Case", className="bg-gray-500 text-white", key="btn_bot")):
+    if(ui.button("Chat about the Case", className="bg-gray-600 text-white", key="btn_bot")):
         st.switch_page("pages/chatbot.py")
 with col3:
-    if(ui.button(f"Timeline of the Case", className="bg-gray-500 text-white", key="btn_time")):
+    if(ui.button(f"Timeline of the Case", className="bg-gray-600 text-white", key="btn_time")):
         st.switch_page("pages/case_timeline.py")
 with col4:
-    if(ui.button("Previous Judgments", className="bg-gray-500 text-white", key="btn_past_judgments")):
+    if(ui.button("Previous Judgments", className="bg-gray-600 text-white", key="btn_past_judgments")):
         st.switch_page("pages/past_judgments.py")
 with col5:
-    if ui.button("Related Cases", className="bg-gray-500 text-white", key="btn_related_cases"):
+    if ui.button("Related Cases", className="bg-gray-600 text-white", key="btn_related_cases"):
         st.switch_page("pages/related_cases.py")
 
 st.markdown("---")

@@ -66,21 +66,16 @@ st.markdown("""
 with st.sidebar:
     st.sidebar.image("lawyer.png")
 
-    st.write("### USER NAME")
-
-    if ui.button("📝 New Case", variant="destructive", key="btn_new_case"):
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
         st.switch_page("pages/new_case.py")
 
-    # for case in st.session_state.cases:
-    #     st.markdown(f"### {case}")
+    st.title("Case History")
     boot()
     user_cases = get_cases_by_user_id(1)
     x = 1
     if user_cases:
         for case in user_cases:
-            # print(f"Case ID: {case['id']}, Case Name: {case['case_name']}")
-            if ui.button(f"📑 {case['case_name']}", className="bg-gray-500 text-white", key = f"ck{x}"):
-                # print("yo")
+            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -150,10 +145,10 @@ col1, col2, col3 = st.columns(3)
 #     if(st.button("Check for Defects")):
 #         st.switch_page("pages/validate.py")
 with col1:
-    if(ui.button("<< Back to Summary", className="bg-gray-500 text-white", key="btn_sum")):
+    if(ui.button("<< Back to Summary", className="bg-gray-600 text-white", key="btn_sum")):
         st.switch_page("pages/current_case.py")
 with col2:
-    if(ui.button("Chat about the Case", className="bg-gray-500 text-white", key="btn_validate_bot_again")):
+    if(ui.button("Chat about the Case", className="bg-gray-600 text-white", key="btn_validate_bot_again")):
         st.switch_page("pages/chatbot.py")
 
 
