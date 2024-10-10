@@ -60,7 +60,8 @@ with st.sidebar:
     ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
     ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
 
-
+import os
+from dotenv import load_dotenv
 def get_conversational_chain():
     prompt_template = """
     Answer the question in as detailed manner as possible from the provided context, make sure to provide all the details, if the answer is not in the provided
@@ -70,7 +71,17 @@ def get_conversational_chain():
 
     Answer:
 """
-    model = ChatGroq(model_name = 'llama-3.1-70b-versatile',api_key = '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')
+    ak = ""
+    if os.path.isdir("./config"):
+        print("local")
+        dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+        load_dotenv(dotenv_path)
+        ak = os.getenv('api_key')
+    else:
+        print("Running on Streamlit Cloud")
+        ak = st.secrets["api_key"]
+
+    model = ChatGroq(model_name = 'llama-3.1-70b-versatile',api_key = ak)
     
     prompt = PromptTemplate(template= prompt_template,input_variables=["context","question"])
     chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
