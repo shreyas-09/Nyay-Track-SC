@@ -18,6 +18,8 @@ if "current_case_name" not in st.session_state:
 
 st.query_params.case_name=st.session_state.current_case_name
 
+
+
 st.markdown("""
 <style>
     .main {
@@ -166,6 +168,64 @@ with col2:
 
 
 st.title("CHECK FOR DEFECTS")
+
+
+score = 7  # Example score out of 10
+
+score_percentage = (score / 10) * 100
+
+custom_css = f"""
+<style>
+    .progress-bar-container {{
+        width: 100%;
+        height: 25px;
+        background: linear-gradient(to right, #8B0000, #FF4500, #FFD700, #ADFF2F, #006400);
+        border-radius: 15px;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }}
+    
+    .progress-bar-marker {{
+        position: absolute;
+        top: 50%;
+        left: {score_percentage}%;
+        transform: translate(-50%, -50%);
+        background-color: black;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }}
+    
+    .score-text {{
+        position: absolute;
+        top: -30px;
+        left: {score_percentage}%;
+        transform: translateX(-50%);
+        font-weight: bold;
+        font-size: 16px;
+        color: #333;
+    }}
+</style>
+"""
+
+st.subheader("Completion Bar")
+# Inject the CSS
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# Display the progress bar and marker with percentage above
+st.markdown(
+    f"""
+    <div class="progress-bar-container">
+        <div class="score-text">{score_percentage:.1f}%</div>
+        <div class="progress-bar-marker"></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("---")
 
 ques = """You are an expert lawyer, Compare the files with the latest Supreme Court of India rules, Check for issues in below mentioned categories in the files and highlight in detail with relevant examples from the file where it is not following supreme court rules: 1. Pagination Issues 2. Annexure Marking Issues 3. Formatting Issues 4. Blurred Sections
 5. Vakalatnama
