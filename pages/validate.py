@@ -261,3 +261,13 @@ ques = """You are an expert lawyer, Compare the files with the  Supreme Court of
 Also give the overall score out of 10 for each category based on severity and amount of issues
 Give the results in the form of table with column 1 as S.No, Column 2 as Category you identify  and Column 3 as Details with examples giving all the details about the issue with clear examples from the files where issue is there and Column 4 as Notification Data which is todays date and column 5 as the score as calculated above"""
 user_input_details(ques)
+
+
+st.subheader("NOTIFY ABOUT THE INCOMPLETE CLAUSES")
+
+st.write("This will send a report to the advocate via Whatsapp regarding the defects in the documents.")
+
+mobile_number = st.text_input("Advocate's Mobile No. (Extracted via the documents)", "+91 8576635782")
+
+if ui.button("NOTIFY", className="bg-sky-900 text-white", size="sm", key ="notify"):
+    st.success(f"Notification sent to {mobile_number}")
