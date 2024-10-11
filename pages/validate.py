@@ -176,16 +176,15 @@ score_percentage = (score / 10) * 100
 
 st.subheader("Completion Bar")
 
-
 custom_css = f"""
 <style>
     .progress-bar-container {{
         width: 100%;
         height: 25px;
-        background: linear-gradient(to right, #D32F2F, #F9A825, #388E3C);
+        background: linear-gradient(to right, #8B1E1E 0.001%, #F6C557 50%, #458D2C 100%);  /* More yellow space */
         border-radius: 15px;
         position: relative;
-        box-shadow: none;  /* Remove glow effect */
+        box-shadow: none;  /* No glow, more matte */
     }}
 
     .progress-bar-marker {{
@@ -253,6 +252,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 st.markdown("---")
 
