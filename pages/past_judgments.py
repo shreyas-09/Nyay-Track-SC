@@ -70,7 +70,7 @@ with st.sidebar:
     x = 1
     if user_cases:
         for case in user_cases:
-            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
+            if ui.button(f"📑 {case['case_name']}", className="bg-slate-600 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -79,9 +79,9 @@ with st.sidebar:
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings ⚙️", className="bg-gray-500 text-white", size="sm")
-    ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
-    ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
+    ui.button("Settings ⚙️", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-neutral-500 text-white", size="sm")
 
 
 

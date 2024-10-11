@@ -77,7 +77,7 @@ with st.sidebar:
     x = 1
     if user_cases:
         for case in user_cases:
-            if ui.button(f"📑 {case['case_name']}", className="bg-red-900 text-white", key = f"ck{x}"):
+            if ui.button(f"📑 {case['case_name']}", className="bg-slate-600 text-white", key = f"ck{x}"):
                 st.session_state.current_case_name = case['case_name']
                 st.switch_page("pages/current_case.py")
             x+=1
@@ -86,9 +86,9 @@ with st.sidebar:
     
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
-    ui.button("Settings ⚙️", className="bg-gray-500 text-white", size="sm")
-    ui.button("Help ❔", className="bg-gray-500 text-white", size="sm")
-    ui.button("Logout 🚪", className="bg-gray-500 text-white", size="sm")
+    ui.button("Settings ⚙️", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-neutral-500 text-white", size="sm")
 
 import os
 from dotenv import load_dotenv
@@ -174,43 +174,68 @@ score = 7  # Example score out of 10
 
 score_percentage = (score / 10) * 100
 
+st.subheader("Completion Bar")
+
+
 custom_css = f"""
 <style>
     .progress-bar-container {{
         width: 100%;
         height: 25px;
-        background: linear-gradient(to right, #8B0000, #FF4500, #FFD700, #ADFF2F, #006400);
+        background: linear-gradient(to right, #D32F2F, #F9A825, #388E3C);
         border-radius: 15px;
         position: relative;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        box-shadow: none;  /* Remove glow effect */
     }}
-    
+
     .progress-bar-marker {{
         position: absolute;
         top: 50%;
         left: {score_percentage}%;
         transform: translate(-50%, -50%);
         background-color: black;
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         border: 3px solid white;
-        box-shadow: 0 0 5px rgba(0,0,0,0.5);
     }}
-    
+
     .score-text {{
         position: absolute;
         top: -30px;
         left: {score_percentage}%;
         transform: translateX(-50%);
         font-weight: bold;
-        font-size: 16px;
+        font-size: 14px;
         color: #333;
+    }}
+
+    /* Labels for start, middle, and end */
+    .progress-label {{
+        position: absolute;
+        bottom: -20px;
+        font-weight: bold;
+        font-size: 12px;
+        color: #333;
+    }}
+
+    .start-label {{
+        left: 0;
+        transform: translateX(0%);
+    }}
+
+    .middle-label {{
+        left: 50%;
+        transform: translateX(-50%);
+    }}
+
+    .end-label {{
+        right: 0;
+        transform: translateX(0%);
     }}
 </style>
 """
 
-st.subheader("Completion Bar")
 # Inject the CSS
 st.markdown(custom_css, unsafe_allow_html=True)
 
@@ -220,6 +245,10 @@ st.markdown(
     <div class="progress-bar-container">
         <div class="score-text">{score_percentage:.1f}%</div>
         <div class="progress-bar-marker"></div>
+        <!-- Labels -->
+        <div class="progress-label start-label">Poor</div>
+        <div class="progress-label middle-label">Good</div>
+        <div class="progress-label end-label">Amazing</div>
     </div>
     """,
     unsafe_allow_html=True
