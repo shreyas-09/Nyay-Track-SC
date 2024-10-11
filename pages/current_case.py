@@ -315,7 +315,7 @@ user_input_details_3(ques_0)
 st.markdown("---")
 
 st.write("### Summary of the Case")
-ques_1 = "You are an expert lawyer, Give me a brief summary of the files uploaded in 5 bullet points, Use the context from the files and don’t create the context."
+ques_1 = "You are an expert lawyer with the Supreme Court of India, Give me a brief summary of the files uploaded with each point having a bold title and a brief description. Keep them restricted to 5-6  points.Use the context from the files and don’t create the context."
 user_input_details_1(ques_1)
 
 st.markdown("---")
