@@ -1,17 +1,24 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
 
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain.prompts import PromptTemplate
+from langchain_groq import ChatGroq
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+
 from src.case import get_cases_by_user_id, get_related_cases, get_past_judgments, get_case_by_name
 
 from src.case import boot
 st.set_page_config(layout="wide")
+
 boot()
 
 if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = st.query_params["case_name"]
 
 st.query_params.case_name=st.session_state.current_case_name
-
 
 st.markdown("""
 <style>
@@ -84,6 +91,56 @@ with st.sidebar:
     ui.button("Logout 🚪", className="bg-neutral-500 text-white", size="sm")
 
 
+import os
+from dotenv import load_dotenv
+def get_conversational_chain():
+    prompt_template = """
+    Answer the question in as detailed manner as possible from the provided context, make sure to provide all the details, if the answer is not in the provided
+    context then just say, "answer is not available in the context", dont provide the wrong answer\n\n
+    Context:\n {context}?\n
+    Question:\n {question}\n
+
+    Answer:
+"""
+    ak = ""
+    if os.path.isdir("./config"):
+        print("local")
+        dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+        load_dotenv(dotenv_path)
+        ak = os.getenv('api_key')
+    else:
+        print("Running on Streamlit Cloud")
+        ak = st.secrets["api_key"]
+
+    model = ChatGroq(model_name = 'llama-3.1-70b-versatile',api_key = ak)
+    
+    prompt = PromptTemplate(template= prompt_template,input_variables=["context","question"])
+    chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
+    return chain
+
+
+def user_input_details(user_question):
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    #if case_db["past_judgment"] == None:
+    with st.spinner("Processing"):
+        embeddings = HuggingFaceEmbeddings()
+
+        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+        docs = new_db.similarity_search(user_question)
+
+        chain = get_conversational_chain()
+
+
+        response = chain(
+            {"input_documents":docs, "question": user_question}
+            , return_only_outputs=True)
+
+        res = response["output_text"]
+
+        st.markdown(res)
+
+
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -96,19 +153,84 @@ with col2:
 
 st.title("PAST JUDGMENTS")
 
+ques = """
 
-case_db = get_case_by_name(st.session_state.current_case_name)
-case_id = case_db["case_name"]
-cases = get_past_judgments(case_id)
+You are a legal expert specializing in case law analysis with the Supreme Court of India. Your task is to analyze the uploaded case file and extract all past precedent cases that are mentioned, referred to, or are relevant to the current case. These include judgments, rulings, orders, and any statutory references that the court has relied on or discussed.
 
-for case in cases:
-    # st.markdown(case[3])
-    st.markdown(f"""
-    <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-            <div class="timeline-text">{case[3]}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+Instructions:
+Extract from the Uploaded Case File:
 
+Scan the uploaded legal case file for any mention of past judgments, case law precedents, or statutory references.
+Include details like:
+Case Name
+Court Name
+Judgment Date
+Case Number (if available)
+Summary of the legal principles used from that case in the current context.
+Search the Internet for Related Precedents:
+
+If any of the precedent cases cannot be fully understood or detailed in the case file, perform an internet search to gather more details about those cases.
+Also, perform an additional search for any past cases that could be relevant to the current case but are not mentioned directly in the case file. Look for cases with similar facts, legal issues, or statutes.
+For each precedent case found, provide:
+A brief description of the case and its relevance.
+The specific legal principle or ruling that was applied.
+A citation or link to the relevant case document or resource.
+Format:
+Please return the extracted precedent cases and search results in the following structured JSON format:
+
+{
+  "precedents": [
+    {
+      "case_name": "Name of the precedent case",
+      "court": "Court Name",
+      "judgment_date": "Judgment Date",
+      "case_number": "Case Number (if available)",
+      "legal_principle": "A brief description of the legal principle applied in the current case",
+      "source_link": "Link to the full case or related legal resource (if found online)"
+    }
+  ]
+}
+Example:
+{
+  "precedents": [
+    {
+      "case_name": "State of Karnataka v. M.L. Kesari",
+      "court": "Supreme Court of India",
+      "judgment_date": "2010",
+      "case_number": "Civil Appeal No. 7019 of 2010",
+      "legal_principle": "Regularization of employees after 10 years of continuous service",
+      "source_link": "https://www.example.com/case"
+    },
+    {
+      "case_name": "Surinder Singh v. Engineer-in-Chief, C.P.W.D.",
+      "court": "Supreme Court of India",
+      "judgment_date": "1986",
+      "legal_principle": "Equal pay for equal work",
+      "source_link": "https://www.example.com/case"
+    }
+  ]
+}
+Additional Information:
+Ensure the legal principles from the precedent cases are properly summarized in the context of how they relate to the current case.
+If no precedent is found online, mark the field source_link as null.
+Analyze the case file carefully and return the results as exhaustively as possible. Don't include the source_link if you can't find reliable link
+
+"""
+user_input_details(ques)
+
+
+
+
+# case_db = get_case_by_name(st.session_state.current_case_name)
+# case_id = case_db["case_name"]
+# cases = get_related_cases(case_id)
+# for case in cases:
+#     # st.markdown(case[3])
+#     st.markdown(f"""
+#     <div class="timeline-item">
+#         <div class="timeline-dot"></div>
+#         <div class="timeline-content">
+#             <div class="timeline-text">{case[3]}</div>
+#         </div>
+#     </div>
+#     """, unsafe_allow_html=True)

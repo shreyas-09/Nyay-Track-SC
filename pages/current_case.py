@@ -64,8 +64,7 @@ if "current_case_name" not in st.session_state:
     st.session_state.current_case_name = st.query_params["case_name"]
 
 st.query_params.case_name=st.session_state.current_case_name
-# print(st.query_params.case_name)
-# print(st.session_state.current_case_name)
+
 
 if "responseSave3" not in st.session_state:
     st.session_state.responseSave3 = ""
@@ -170,22 +169,10 @@ def user_input_details_1(user_question):
                 , return_only_outputs=True)
 
             res = response["output_text"]
-            # print(res)
             styled_res = res.replace('\n', '<br>')
-            # print(styled_res)
-            # styled_res = "**bold hua kya**"+styled_res
-            # styled_res = "* point aaya kya"+styled_res
             styled_res = convert_bold_to_html(styled_res)
             styled_res = convert_bullets_to_html(styled_res)
 
-            # TODO: Add processed output to relevant case_id
-            #update_processed_output(case_id=None, processed_output=styled_res)
-            
-            # st.markdown(f"""
-            # <div style="font-size: 18px;">
-            #     {styled_res}
-            # </div>
-            # """, unsafe_allow_html=True)
             st.markdown(f"""
                 <div class="timeline-content" style="font-size: 18px;>
                     <div class="timeline-text">{styled_res}</div>
@@ -206,6 +193,8 @@ def user_input_details_1(user_question):
         """, unsafe_allow_html=True)
         
 
+
+import json
 def user_input_details_2(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
@@ -235,13 +224,46 @@ def user_input_details_2(user_question):
             """, unsafe_allow_html=True)
             # st.session_state.responseSave2 = res
             update_entity_list(st.session_state.current_case_name,styled_res)
+
+            # print(styled_res)
     else:
-        st.markdown(f"""
-            <div class="timeline-content"; style="font-size: 20px;>
-                <div class="timeline-text">{case_db["entity_list"]}</div>
-            </div>
-        """, unsafe_allow_html=True)
-        
+
+        st.markdown(
+            """
+            <style>
+            .entity-container {
+                display: flex;
+            }
+            .entity-label {
+                font-weight: bold;
+                flex: 1.5;  
+                color: black;
+                margin-left: 10px;
+            }
+            .entity-value {
+                flex: 1;  
+                color: blue;
+                margin-left: -1300px;
+            }
+            </style>
+            """, 
+            unsafe_allow_html=True
+        )
+
+        stages = json.loads(case_db['entity_list'])
+
+        st.markdown("<div class='entity-container'>", unsafe_allow_html=True)
+
+        for item in stages:
+            st.markdown(f"""
+                <div class="entity-container">
+                    <div class="entity-label">{item['entity_type']}</div>
+                    <div class="entity-value">{item['entity_name']}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
 def user_input_details_3(user_question):
     # if st.session_state.responseSave3 == "":
@@ -314,6 +336,80 @@ user_input_details_3(ques_0)
 
 st.markdown("---")
 
+st.write("### Sub-category of the Case")
+ques_3 = """
+You are an expert in legal document analysis. Your task is to analyze a legal case file and identify the correct sub-category from the following list of main categories and their sub-categories. Return only the sub-category as a single line of text.
+
+Categories and Sub-Categories:
+1.Civil Case:
+Property Disputes
+Contractual Disputes
+Family Matters (Divorce, Custody)
+Torts (Negligence, Defamation)
+Recovery Suits
+
+2.Criminal Case:
+
+Offenses Against Person (Murder, Assault)
+Offenses Against Property (Theft, Robbery)
+White-Collar Crimes (Fraud, Money Laundering)
+Cyber Crimes
+Sexual Offenses (Rape, Harassment)
+
+3.Constitutional Case:
+
+Fundamental Rights Violations
+Public Interest Litigation (PIL)
+Federal Disputes (Centre-State Conflicts)
+Constitutional Interpretation
+
+4.Special Leave Petitions (SLP):
+
+Civil SLP
+Criminal SLP
+SLP in Tax Matters
+SLP in Service Matters
+5. Writ Petitions:
+
+Habeas Corpus
+Mandamus
+Certiorari
+Prohibition
+Quo Warranto
+6. Review & Curative Petitions:
+
+Review Petition
+Curative Petition
+7. Advisory Jurisdiction:
+
+Reference by the President of India under Article 143
+Interpretation of Statutory Provisions
+8. Election Matters:
+
+Election Disputes
+Disqualification of Elected Members
+Election Commission Orders
+9. Transfer Petitions:
+
+Civil Transfer Petition
+Criminal Transfer Petition
+10. Contempt of Court:
+
+Civil Contempt
+Criminal Contempt
+11. Service Matters:
+Promotion & Seniority Disputes
+Disciplinary Actions
+Pension & Retirement Benefits
+Recruitment Disputes
+Output:
+Return only the sub-category as a single line of text.
+
+"""
+user_input_details_3(ques_3)
+
+st.markdown("---")
+
 st.write("### Summary of the Case")
 ques_1 = "You are an expert lawyer with the Supreme Court of India, Give me a brief summary of the files uploaded with each point having a bold title and a brief description. Keep them restricted to 5-6  points.Use the context from the files and don’t create the context."
 user_input_details_1(ques_1)
@@ -321,5 +417,100 @@ user_input_details_1(ques_1)
 st.markdown("---")
 
 st.write("### Entity List")
-ques_2 = "You are an expert lawyer, Identify the entities in the files uploaded and give the details in a structured table format for each file. Dont mention structured table format in the result"
+ques_2 ="""You are a legal document expert with the Supreme Court of India. Your task is to analyze a legal case file and extract all relevant entities in an exhaustive manner in a structured JSON format. The entities to be extracted include, but are not limited to:
+
+1. **Parties Involved**:
+   - Petitioners
+   - Respondents
+   - Appellants
+   - Defendants
+   - Plaintiffs
+
+2. **Legal Representatives**:
+   - Advocate for Petitioners
+   - Advocate for Respondents
+   - Senior Counsel
+   - Solicitor General
+   - Additional Solicitor General
+
+3. **Judiciary**:
+   - Judges
+   - Chief Justice
+   - Bench Composition (Single Judge, Division Bench, etc.)
+
+4. **Government Officials**:
+   - Secretary
+   - Director General
+   - Attorney General
+   - Special Secretaries
+   - Inspector General
+
+5. **Case Details**:
+   - Case Number
+   - Court Name
+   - Jurisdiction
+   - Date of Filing
+   - Date of Judgement
+
+6. **Documents and Evidence**:
+   - Affidavits
+   - Written Submissions
+   - Annexures
+   - Exhibits
+
+7. **Court Proceedings**:
+   - Orders
+   - Interim Orders
+   - Final Judgments
+   - Notices
+   - Stay Orders
+
+8. **Legislation and Acts Involved**:
+   - Specific Laws/Statutes referenced
+   - Relevant Sections of Law
+
+9. **Other Entities**:
+   - Corporations
+   - Government Departments
+   - NGOs
+   - Agencies involved
+
+Please return the extracted information in the following JSON format:
+
+"
+[
+    {
+      "entity_type": "Petitioner",
+      "entity_name": "Name of Petitioner"
+    },
+    {
+      "entity_type": "Respondent",
+      "entity_name": "Name of Respondent"
+    },
+    {
+      "entity_type": "Advocate for Petitioners",
+      "entity_name": "Name of Advocate for Petitioners"
+    },
+    {
+      "entity_type": "Judge",
+      "entity_name": "Name of Judge"
+    },
+    {
+      "entity_type": "Government Official",
+      "entity_name": "Name of Government Official"
+    },
+    {
+      "entity_type": "Law/Statute",
+      "entity_name": "Name of Law or Statute"
+    },
+    {
+      "entity_type": "Order",
+      "entity_name": "Interim Order or Judgment"
+    }
+]
+"
+
+
+Analyze the case file carefully and extract each entity, categorizing it as per the entity types and making it as exhaustive as possible. Provide accurate names and details and give only the JSON and nothing else.
+"""
 user_input_details_2(ques_2)

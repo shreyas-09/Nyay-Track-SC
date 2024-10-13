@@ -183,13 +183,13 @@ timeline_css = """
         background-color: #7F1D1D;
     }
     .content {
-    padding: 30px; /* Increased padding for more space */
-    background: #f7f7f7; /* Light grey background for a softer look */
+    padding: 30px; 
+    background: #f7f7f7; 
     position: relative;
-    border-radius: 12px; /* Softer corners */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Enhanced shadow for depth */
-    border: 1px solid #e0e0e0; /* Light grey border for definition */
-    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effect */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0; 
+    transition: transform 0.3s, box-shadow 0.3s; 
 }
 
 .content:hover {
@@ -207,59 +207,13 @@ timeline_css = """
 
 import json
 if timeline_data is not None:
-    # print(timeline_data)
-    # # print("&&&&&&&")
-    # arr = []
-    # s = ""
-    # pick = False
-    # for i in range(len(timeline_data)):
-    #     if timeline_data[i] == '\"':
-    #         if pick == False:
-    #             pick=True
-    #         else:
-    #             pick = False
-    #             # print(s)
-    #             arr.append(s)
-    #             s=""
-    #     else:
-    #         if pick:
-    #             s+=timeline_data[i]
-    # I = 0
-    # while (I+3)<len(arr):
-    #     st.markdown(f"""
-    #     <div class="timeline-item">
-    #         <div class="timeline-dot"></div>
-    #         <div class="timeline-content">
-    #             <div class="timeline-text">{arr[I+1]}</div>
-    #             <div class="timeline-text">{arr[I+3]}</div>
-    #         </div>
-    #     </div>
-    #     """, unsafe_allow_html=True)
-    #     I+=4
-
-
     stages = json.loads(timeline_data)
-    # print(stages)
-
-    # from datetime import datetime
-
-    # # Streamlit layout for timeline component
     st.title("Case Timeline")
-
-    # # Dynamically create the timeline
-    # for stage in stages:
-        
-    #     st.markdown(f"### {stage['date']}")
-    #     st.write(f"{stage['content']}")
-    #     st.markdown('<hr style="border:1px solid green">', unsafe_allow_html=True)
-
     st.markdown(timeline_css, unsafe_allow_html=True)
 
-    # Create the timeline
     st.markdown('<div class="timeline">', unsafe_allow_html=True)
 
     for item in stages:
-        # status_class = "completed" if item["complete"] else ""
         st.markdown(f"""
             <div class="container completed">
                 <div class="dot"></div>
