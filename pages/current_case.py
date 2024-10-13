@@ -216,16 +216,44 @@ def user_input_details_2(user_question):
             # styled_res = res.replace('\n', '<br>')
             styled_res = convert_bold_to_html(res)
             styled_res = convert_bullets_to_html(styled_res)
-            # st.write(res)
-            st.markdown(f"""
-                <div class="timeline-content"; style="font-size: 18px;>
-                    <div class="timeline-text">{styled_res}</div>
-                </div>
-            """, unsafe_allow_html=True)
-            # st.session_state.responseSave2 = res
+           
             update_entity_list(st.session_state.current_case_name,styled_res)
 
-            # print(styled_res)
+            st.markdown(
+                """
+                <style>
+                .entity-container {
+                    display: flex;
+                }
+                .entity-label {
+                    font-weight: bold;
+                    flex: 1.5;  
+                    color: black;
+                    margin-left: 10px;
+                }
+                .entity-value {
+                    flex: 1;  
+                    color: blue;
+                    margin-left: -1300px;
+                }
+                </style>
+                """, 
+                unsafe_allow_html=True
+            )
+
+            stages = json.loads(styled_res)
+
+            st.markdown("<div class='entity-container'>", unsafe_allow_html=True)
+
+            for item in stages:
+                st.markdown(f"""
+                    <div class="entity-container">
+                        <div class="entity-label">{item['entity_type']}</div>
+                        <div class="entity-value">{item['entity_name']}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("</div>", unsafe_allow_html=True)
     else:
 
         st.markdown(
