@@ -83,7 +83,7 @@ with st.sidebar:
             x+=1
     else:
         print("No cases found for this user.")
-    
+
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
     ui.button("Settings ⚙️", className="bg-neutral-500 text-white", size="sm")
@@ -113,7 +113,7 @@ def get_conversational_chain():
         ak = st.secrets["api_key"]
 
     model = ChatGroq(model_name = 'llama-3.1-70b-versatile',api_key = ak)
-    
+
     prompt = PromptTemplate(template= prompt_template,input_variables=["context","question"])
     chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
     return chain
@@ -175,46 +175,12 @@ For each precedent case found, provide:
 A brief description of the case and its relevance.
 The specific legal principle or ruling that was applied.
 A citation or link to the relevant case document or resource.
-Format:
-Please return the extracted precedent cases and search results in the following structured JSON format:
+Please return the extracted precedent cases and search results in a structured format
 
-{
-  "precedents": [
-    {
-      "case_name": "Name of the precedent case",
-      "court": "Court Name",
-      "judgment_date": "Judgment Date",
-      "case_number": "Case Number (if available)",
-      "legal_principle": "A brief description of the legal principle applied in the current case",
-      "source_link": "Link to the full case or related legal resource (if found online)"
-    }
-  ]
-}
-Example:
-{
-  "precedents": [
-    {
-      "case_name": "State of Karnataka v. M.L. Kesari",
-      "court": "Supreme Court of India",
-      "judgment_date": "2010",
-      "case_number": "Civil Appeal No. 7019 of 2010",
-      "legal_principle": "Regularization of employees after 10 years of continuous service",
-      "source_link": "https://www.example.com/case"
-    },
-    {
-      "case_name": "Surinder Singh v. Engineer-in-Chief, C.P.W.D.",
-      "court": "Supreme Court of India",
-      "judgment_date": "1986",
-      "legal_principle": "Equal pay for equal work",
-      "source_link": "https://www.example.com/case"
-    }
-  ]
-}
 Additional Information:
 Ensure the legal principles from the precedent cases are properly summarized in the context of how they relate to the current case.
 If no precedent is found online, mark the field source_link as null.
 Analyze the case file carefully and return the results as exhaustively as possible. Don't include the source_link if you can't find reliable link
-
 """
 user_input_details(ques)
 

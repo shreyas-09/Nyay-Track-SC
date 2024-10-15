@@ -86,7 +86,7 @@ with st.sidebar:
             x+=1
     else:
         print("No cases found for this user.")
-    
+
     st.text_input("Search Previous Cases")
     st.markdown("""---""")
     ui.button("Settings ⚙️", className="bg-neutral-500 text-white", size="sm")
@@ -116,7 +116,7 @@ def get_conversational_chain():
         ak = st.secrets["api_key"]
 
     model = ChatGroq(model_name = 'llama-3.1-70b-versatile',api_key = ak)
-    
+
     prompt = PromptTemplate(template= prompt_template,input_variables=["context","question"])
     chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
     return chain
@@ -176,48 +176,12 @@ Criteria for Similarity:
 Legal Principles: The legal doctrines, laws, or statutes applied in the case.
 Facts: Similar circumstances such as employment disputes, pension-related issues, or cases involving the Special Frontier Force (SFF) or government employment status.
 Court Rulings: Prior judgments that resulted in decisions on employment status, pensionary benefits, or similar government service issues.
-Output Format:
-Provide the extracted similar cases in the following structured JSON format:
 
-{
-  "similar_cases": [
-    {
-      "case_name": "Name of the similar case",
-      "court": "Court Name",
-      "judgment_date": "Judgment Date",
-      "case_number": "Case Number (if available)",
-      "legal_principle": "A brief description of the legal principle or ruling in this similar case",
-      "similarity": "Description of why this case is similar to the current case",
-      "source_link": "Link to the case or related resource (if found online)"
-    }
-  ]
-}
-Example:
-{
-  "similar_cases": [
-    {
-      "case_name": "State of Karnataka v. M.L. Kesari",
-      "court": "Supreme Court of India",
-      "judgment_date": "2010",
-      "case_number": "Civil Appeal No. 7019 of 2010",
-      "legal_principle": "Regularization of employees after 10 years of continuous service",
-      "similarity": "Addresses the issue of employment regularization, similar to the current case",
-      "source_link": "https://www.example.com/case"
-    },
-    {
-      "case_name": "State of Punjab v. Jagjit Singh",
-      "court": "Supreme Court of India",
-      "judgment_date": "2016",
-      "case_number": "Civil Appeal No. 213 of 2016",
-      "legal_principle": "Equal pay for equal work for temporary employees",
-      "similarity": "Addresses the principle of equal pay for temporary employees, relevant to the current case",
-      "source_link": "https://www.example.com/case"
-    }
-  ]
-}
+Please return the extracted similar cases and search results in a structured format
+
 Additional Instructions:
 Ensure that all similar cases are related by either fact pattern, legal principles, or court judgments that align with the issues in the current case.
-If no similar cases are found in the case file, perform the internet search to fill this gap and return relevant cases. Please give only the JSON code.
+If no similar cases are found in the case file, perform the internet search to fill this gap and return relevant cases.
 """
 user_input_details(ques)
 

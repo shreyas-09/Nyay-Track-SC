@@ -198,100 +198,75 @@ import json
 def user_input_details_2(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
-    if case_db["entity_list"] == None:
+    if case_db["entity_list"] is None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
-            
             new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
             docs = new_db.similarity_search(user_question)
-
             chain = get_conversational_chain()
-
-            
             response = chain(
-                {"input_documents":docs, "question": user_question}
-                , return_only_outputs=True)
-
+                {"input_documents": docs, "question": user_question},
+                return_only_outputs=True
+            )
             res = response["output_text"]
-            # styled_res = res.replace('\n', '<br>')
             styled_res = convert_bold_to_html(res)
             styled_res = convert_bullets_to_html(styled_res)
-           
-            update_entity_list(st.session_state.current_case_name,styled_res)
-
-            st.markdown(
-                """
-                <style>
-                .entity-container {
-                    display: flex;
-                }
-                .entity-label {
-                    font-weight: bold;
-                    flex: 1.5;  
-                    color: black;
-                    margin-left: 10px;
-                }
-                .entity-value {
-                    flex: 1;  
-                    color: blue;
-                    margin-left: -1300px;
-                }
-                </style>
-                """, 
-                unsafe_allow_html=True
-            )
-
+            update_entity_list(st.session_state.current_case_name, styled_res)
             stages = json.loads(styled_res)
-
-            st.markdown("<div class='entity-container'>", unsafe_allow_html=True)
-
-            for item in stages:
-                st.markdown(f"""
-                    <div class="entity-container">
-                        <div class="entity-label">{item['entity_type']}</div>
-                        <div class="entity-value">{item['entity_name']}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-
-            st.markdown("</div>", unsafe_allow_html=True)
     else:
-
-        st.markdown(
-            """
-            <style>
-            .entity-container {
-                display: flex;
-            }
-            .entity-label {
-                font-weight: bold;
-                flex: 1.5;  
-                color: black;
-                margin-left: 10px;
-            }
-            .entity-value {
-                flex: 1;  
-                color: blue;
-                margin-left: -1300px;
-            }
-            </style>
-            """, 
-            unsafe_allow_html=True
-        )
-
         stages = json.loads(case_db['entity_list'])
 
-        st.markdown("<div class='entity-container'>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        .entity-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .entity-label {
+            font-weight: bold;
+            color: black;
+            flex: 1 1 100%;
+            margin-bottom: 5px;
+        }
+        .entity-value {
+            color: blue;
+            flex: 1 1 100%;
+        }
+        @media (min-width: 768px) {
+            .entity-container {
+                flex-wrap: nowrap;
+            }
+            .entity-label {
+                flex: 0 0 30%;
+                margin-bottom: 0;
+                padding-right: 10px;
+            }
+            .entity-value {
+                flex: 0 0 70%;
+            }
+        }
+        @media (min-width: 1200px) {
+            .entity-label {
+                flex: 0 0 20%;
+            }
+            .entity-value {
+                flex: 0 0 80%;
+            }
+        }
+        </style>
+        """, 
+        unsafe_allow_html=True
+    )
 
-        for item in stages:
-            st.markdown(f"""
-                <div class="entity-container">
-                    <div class="entity-label">{item['entity_type']}</div>
-                    <div class="entity-value">{item['entity_name']}</div>
-                </div>
-            """, unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
+    for item in stages:
+        st.markdown(f"""
+            <div class="entity-container">
+                <div class="entity-label">{item['entity_type']}</div>
+                <div class="entity-value">{item['entity_name']}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
 def user_input_details_3(user_question):
     # if st.session_state.responseSave3 == "":
@@ -537,7 +512,6 @@ Please return the extracted information in the following JSON format:
     }
 ]
 "
-
 
 Analyze the case file carefully and extract each entity, categorizing it as per the entity types and making it as exhaustive as possible. Provide accurate names and details and give only the JSON and nothing else.
 """
