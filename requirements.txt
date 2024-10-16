@@ -10,3 +10,5 @@ torch
 transformers
 reportlab
 streamlit-shadcn-ui
+twilio
+requests

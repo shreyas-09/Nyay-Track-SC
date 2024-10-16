@@ -6,11 +6,16 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 import streamlit_shadcn_ui as ui
-
+import os
+from dotenv import load_dotenv
 from src.case import get_cases_by_user_id, update_defects, get_case_by_name
-
 from src.case import boot
 st.set_page_config(layout="wide")
+import twilio
+from twilio.rest import Client
+import requests
+
+
 boot()
 
 if "current_case_name" not in st.session_state:
@@ -18,7 +23,11 @@ if "current_case_name" not in st.session_state:
 
 st.query_params.case_name=st.session_state.current_case_name
 
+if "responseSave" not in st.session_state:
+    st.session_state.responseSave = ""
 
+if "responseSave1" not in st.session_state:
+    st.session_state.responseSave1 = ""
 
 st.markdown("""
 <style>
@@ -90,8 +99,6 @@ with st.sidebar:
     ui.button("Help ❔", className="bg-neutral-500 text-white", size="sm")
     ui.button("Logout 🚪", className="bg-neutral-500 text-white", size="sm")
 
-import os
-from dotenv import load_dotenv
 
 def get_conversational_chain():
     prompt_template = """
@@ -131,34 +138,69 @@ def user_input_details(user_question):
 
             chain = get_conversational_chain()
 
-            
             response = chain(
                 {"input_documents":docs, "question": user_question}
                 , return_only_outputs=True)
 
             res = response["output_text"]
-        
+
             st.markdown(res)
-            # st.markdown(f"""
-            #     <div class="timeline-content" style="font-size: 18px;>
-            #         <div class="timeline-text">{res}</div>
-            #     </div>
-            # """, unsafe_allow_html=True)
-            # st.session_state.responseSave3 = styled_res
+           
             update_defects(st.session_state.current_case_name,res)
+
     else:
         st.markdown(case_db["defects"])
-        # st.markdown(f"""
-        #     <div class="timeline-content" style="font-size: 18px;>
-        #         <div class="timeline-text">{case_db["defects"]}</div>
-        #     </div>
-        # """, unsafe_allow_html=True)
+     
+def user_input_details_2(user_question):
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["defects"] == None:
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
 
+            chain = get_conversational_chain()
 
+            response_1 = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response_1["output_text"]
+           
+            update_defects(st.session_state.responseSave,res)
+
+    else:
+        res = 0.0
+
+    return res
+
+def user_input_details_3(user_question):
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+
+    with st.spinner("Processing"):
+        embeddings = HuggingFaceEmbeddings()
+            
+        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+        docs = new_db.similarity_search(user_question)
+
+        chain = get_conversational_chain()
+
+        response = chain(
+            {"input_documents":docs, "question": user_question}
+            , return_only_outputs=True)
+
+        res = response["output_text"]
+           
+        update_defects(st.session_state.responseSave1,res)
+
+    return res
+
+    
 col1, col2, col3 = st.columns(3)
-# with col1:
-#     if(st.button("Check for Defects")):
-#         st.switch_page("pages/validate.py")
+
 with col1:
     if(ui.button("<< Back to Summary", className="bg-gray-600 text-white", key="btn_sum")):
         st.switch_page("pages/current_case.py")
@@ -169,8 +211,102 @@ with col2:
 
 st.title("CHECK FOR DEFECTS")
 
+ques = """
 
-score = 7  # Example score out of 10
+You are a legal document analysis expert with the Supreme Court of India. Your task is to evaluate an uploaded legal case file based on the Supreme Court of India 2013 registry rules and identify any procedural defects or issues in the document. 
+The defects must be categorized and evaluated according to common filing errors, such as delays, incomplete documentation, incorrect indexing, or improper naming conventions.
+
+Instructions:
+Scan the Uploaded Case File:
+
+Review the entire case file to identify and extract specific issues or procedural defects.
+Focus on issues commonly raised in the Supreme Court of India’s 2013 rules such as:
+Delay in filing or refiling.
+Missing or incomplete documents.
+Incorrect court fees.
+Errors in naming parties.
+Vakalatnama issues (e.g., missing signatures, incorrect filing dates).
+Incorrect or incomplete indexing.
+Inconsistent dates on documents.
+Evaluate the Severity of Each Defect:
+
+For each defect identified, rate the severity of the issue on a scale of 1 to 10, where:
+1 represents severe issues, such as missing key documents or significant delays.
+10 represents no issues or minimal impact on the case.
+
+Ensure the scoring is based on the severity and frequency of the identified issues.
+
+For each case file:
+
+For every defect, provide a clear and well-explained examples from the case file or reference from the case file.
+Mention specific page numbers, sections, or references to support your observations.
+Add notification date as today’s date for each identified issue.
+Output in Table Format:
+
+Return the findings in the following table format:
+
+column 1 as S.No, Column 2 as Category you identify, Column 3 as Details with examples and Column 4 as Notification Date which is todays date and column 5 as the score as calculated above.
+
+Give ONLY the table as the final output
+"""
+
+ques_2 = """
+
+You are a legal document analysis expert with the Supreme Court of India. Your task is to evaluate an uploaded legal case file based on the Supreme Court of India 2013 registry rules and identify any procedural defects or issues in the document. 
+The defects must be categorized and evaluated according to common filing errors, such as delays, incomplete documentation, incorrect indexing, or improper naming conventions.
+
+Instructions:
+Scan the Uploaded Case File:
+
+Review the entire case file to identify and extract specific issues or procedural defects.
+Focus on issues commonly raised in the Supreme Court of India’s 2013 rules such as:
+Delay in filing or refiling.
+Missing or incomplete documents.
+Incorrect court fees.
+Errors in naming parties.
+Vakalatnama issues (e.g., missing signatures, incorrect filing dates).
+Incorrect or incomplete indexing.
+Inconsistent dates on documents.
+Evaluate the Severity of Each Defect:
+
+For each defect identified, rate the severity of the issue on a scale of 1 to 10, where:
+1 represents severe issues, such as missing key documents or significant delays.
+10 represents no issues or minimal impact on the case.
+
+Ensure the scoring is based on the severity and frequency of the identified issues.
+
+Give the overall score as an output which is average score of each score.
+
+Make sure to give only overall score number in decimals/float as an output and nothing else.
+
+"""
+
+ques_3 = """
+
+You are a legal document analysis expert with the Supreme Court of India. Your task is to evaluate an uploaded legal case file based on the Supreme Court of India 2013 registry rules and identify any procedural defects or issues in the document. 
+The defects must be categorized and evaluated according to common filing errors, such as delays, incomplete documentation, incorrect indexing, or improper naming conventions.
+
+Instructions:
+Scan the Uploaded Case File:
+
+Review the entire case file to identify and extract specific issues or procedural defects.
+Focus on issues commonly raised in the Supreme Court of India’s 2013 rules such as:
+Delay in filing or refiling.
+Missing or incomplete documents.
+Incorrect court fees.
+Errors in naming parties.
+Vakalatnama issues (e.g., missing signatures, incorrect filing dates).
+Incorrect or incomplete indexing.
+Inconsistent dates on documents.
+Evaluate the Severity of Each Defect:
+
+Give the 50 word summary of the defects in bullet points, Make sure that the summary is 50 words only.
+
+"""
+
+score = user_input_details_2(ques_2)
+
+score = float(score)
 
 score_percentage = (score / 10) * 100
 
@@ -253,21 +389,33 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 st.markdown("---")
 
-ques = """You are an expert lawyer, Compare the files with the  Supreme Court of India registry rules 2013 , Check for all kinds of defects and issues  as stated in the rules and are frequent errors in case filing in the files and highlight in detail with relevant examples from the file where it is not following supreme court rules.
-
-Also give the overall score out of 10 for each category based on severity and amount of issues
-Give the results in the form of table with column 1 as S.No, Column 2 as Category you identify  and Column 3 as Details with examples giving all the details about the issue with clear examples from the files where issue is there and Column 4 as Notification Data which is todays date and column 5 as the score as calculated above"""
 user_input_details(ques)
-
 
 st.subheader("NOTIFY ABOUT THE INCOMPLETE CLAUSES")
 
 st.write("This will send a report to the advocate via Whatsapp regarding the defects in the documents.")
 
-mobile_number = st.text_input("Advocate's Mobile No. (Extracted via the documents)", "+91 8576635782")
+mobile_number = st.text_input("Advocate's Mobile No. (Extracted via the documents)", "+919591269696")
+# Initialize Twilio client
+client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+# Streamlit UI
+#st.title("WhatsApp Chatbot Dashboard")
+
+# Input box to send a message
+
+summary = user_input_details_3(ques_3)
+message = "This is the automated bot by the Supreme Court Registry Service to notify you regarding the defects in your file" + st.query_params.case_name+ "This is a summary of defects:" + summary + " Please rectify them at the earliest and upload the documents here"
+
 
 if ui.button("NOTIFY", className="bg-sky-900 text-white", size="sm", key ="notify"):
+
+    response = client.messages.create(
+                body=message,
+                from_=WHATSAPP_NUMBER,
+                to=TO_NUMBER
+            )
+
     st.success(f"Notification sent to {mobile_number}")
