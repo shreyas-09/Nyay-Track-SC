@@ -16,7 +16,7 @@ def render_sidebar():
         x = 1
         if user_cases:
             for case in user_cases:
-                if ui.button(f"📑 {case['case_name']}", className="bg-slate-600 text-white", key = f"ck{x}"):
+                if ui.button(f"{case['case_name']}", className="bg-gray-400 text-white", key = f"ck{x}", size = "sm"):
                     st.session_state.current_case_name = case['case_name']
                     st.switch_page("pages/current_case.py")
                 x+=1
