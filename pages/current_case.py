@@ -166,6 +166,8 @@ def user_input_details_1(user_question):
 
 
 import json
+from collections import defaultdict
+
 def user_input_details_2(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
@@ -190,54 +192,37 @@ def user_input_details_2(user_question):
     st.markdown(
         """
         <style>
-        .entity-container {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
         .entity-label {
             font-weight: bold;
             color: black;
-            flex: 1 1 100%;
-            margin-bottom: 5px;
         }
         .entity-value {
-            color: blue;
-            flex: 1 1 100%;
-        }
-        @media (min-width: 768px) {
-            .entity-container {
-                flex-wrap: nowrap;
-            }
-            .entity-label {
-                flex: 0 0 30%;
-                margin-bottom: 0;
-                padding-right: 10px;
-            }
-            .entity-value {
-                flex: 0 0 70%;
-            }
-        }
-        @media (min-width: 1200px) {
-            .entity-label {
-                flex: 0 0 20%;
-            }
-            .entity-value {
-                flex: 0 0 80%;
-            }
+            color: #A93737;
         }
         </style>
         """, 
         unsafe_allow_html=True
     )
 
+    grouped_entities = defaultdict(list)
+
     for item in stages:
-        st.markdown(f"""
-            <div class="entity-container">
-                <div class="entity-label">{item['entity_type']}</div>
-                <div class="entity-value">{item['entity_name']}</div>
-            </div>
-        """, unsafe_allow_html=True)
+        grouped_entities[item['entity_type']].append(item['entity_name'])
+
+    for entity_type, entity_names in grouped_entities.items():
+        st.markdown(f"<div class='entity-container'><div class='entity-label'>{entity_type}</div>", unsafe_allow_html=True)
+        for idx, name in enumerate(entity_names, start=1):
+            st.markdown(f"<div class='entity-value'>{idx}. {name}</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    for entity_type, entity_names in grouped_entities.items():
+        st.markdown(f"<div class='entity-container'><div class='entity-label'>{entity_type}</div>", unsafe_allow_html=True)
+        
+        if len(entity_names) == 1:
+            st.markdown(f"<div class='entity-value'>{entity_names[0]}</div>", unsafe_allow_html=True)
+        else:
+            for idx, name in enumerate(entity_names, start=1):
+                st.markdown(f"<div class='entity-value'>{idx}. {name}</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def user_input_details_3(user_question):
