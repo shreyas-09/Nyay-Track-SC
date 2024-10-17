@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
-from src.case import get_cases_by_user_id
+from src.case import get_last_5_cases_by_user_id
 from src.case import boot
 
 def render_sidebar():
@@ -12,7 +12,7 @@ def render_sidebar():
 
         st.title("Case History")
         boot()
-        user_cases = get_cases_by_user_id(1)
+        user_cases = get_last_5_cases_by_user_id(1)
         x = 1
         if user_cases:
             for case in user_cases:

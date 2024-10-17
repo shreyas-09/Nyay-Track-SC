@@ -6,7 +6,7 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 import streamlit_shadcn_ui as ui
 from components.sidebar import render_sidebar
-from src.case import get_cases_by_user_id, get_case_by_name, update_processed_output, update_entity_list
+from src.case import get_cases_by_user_id, get_case_by_name, update_processed_output, update_entity_list, update_category, update_sub_category
 
 from src.case import boot
 
@@ -139,7 +139,6 @@ def user_input_details_1(user_question):
             docs = new_db.similarity_search(user_question)
 
             chain = get_conversational_chain()
-
             
             response = chain(
                 {"input_documents":docs, "question": user_question}
@@ -158,11 +157,6 @@ def user_input_details_1(user_question):
             # st.session_state.responseSave1 = styled_res
             update_processed_output(st.session_state.current_case_name,styled_res)
     else:
-        # st.markdown(f"""
-        # <div style="font-size: 18px;">
-        #     {case_db["processed_output"]}
-        # </div>
-        # """, unsafe_allow_html=True)
         st.markdown(f"""
             <div class="timeline-content" style="font-size: 18px;>
                 <div class="timeline-text">{case_db["processed_output"]}</div>
@@ -245,31 +239,71 @@ def user_input_details_2(user_question):
             </div>
         """, unsafe_allow_html=True)
 
+
 def user_input_details_3(user_question):
-    # if st.session_state.responseSave3 == "":
-    with st.spinner("Processing"):
-        embeddings = HuggingFaceEmbeddings()
-        
-        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(user_question)
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["category"] == None:
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
 
-        chain = get_conversational_chain()
+            chain = get_conversational_chain()
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
 
-        
-        response = chain(
-            {"input_documents":docs, "question": user_question}
-            , return_only_outputs=True)
+            res = response["output_text"]
 
-        res = response["output_text"]
+            st.markdown(f"""
+                <div class="timeline-content" style="font-size: 18px;>
+                    <div class="timeline-text">{res}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+            update_category(st.session_state.current_case_name,res)
+    else:
         st.markdown(f"""
             <div class="timeline-content" style="font-size: 18px;>
-                <div class="timeline-text"><strong>{res}</strong></div>
+                <div class="timeline-text">{case_db["category"]}</div>
             </div>
         """, unsafe_allow_html=True)
-        # st.write(res)
-        # st.session_state.responseSave3 = res
-    # else:
-    #     st.write(st.session_state.responseSave3)
+
+def user_input_details_4(user_question):
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["sub_category"] == None:
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
+
+            chain = get_conversational_chain()
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
+
+            res = response["output_text"]
+
+            st.markdown(f"""
+                <div class="timeline-content" style="font-size: 18px;>
+                    <div class="timeline-text">{res}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+            update_sub_category(st.session_state.current_case_name,res)
+    else:
+        st.markdown(f"""
+            <div class="timeline-content" style="font-size: 18px;>
+                <div class="timeline-text">{case_db["sub_category"]}</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
 
 
 s= "CASE: "+st.session_state.current_case_name
@@ -386,7 +420,7 @@ Output:
 Return only the sub-category as a single line of text.
 
 """
-user_input_details_3(ques_3)
+user_input_details_4(ques_3)
 
 st.markdown("---")
 

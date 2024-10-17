@@ -7,7 +7,7 @@ cursor = None
 
 # Define the Case entity
 class Case:
-    def __init__(self, case_name, docs, raw_text, user_id, processed_output, additional_details=None, defects=None, entity_list=None, upload_date=None):
+    def __init__(self, case_name, docs, raw_text, user_id, processed_output, additional_details=None, defects=None, entity_list=None, upload_date=None, defects_score=None, timeline=None, category=None, sub_category=None, past=None, related=None):
         self.case_name = case_name
         self.docs = docs
         self.raw_text = raw_text.encode('utf-8')  # Convert raw_text to bytes
@@ -17,6 +17,13 @@ class Case:
         self.defects = defects
         self.entity_list = entity_list
         self.upload_date = upload_date or datetime.now()
+        self.defects_score = defects_score
+        self.timeline = timeline
+        self.category = category
+        self.sub_category = sub_category
+        self.past = past
+        self.related = related
+
 
 # Define the RelatedCase entity
 class RelatedCase:
@@ -75,19 +82,26 @@ def boot():
 
     # Create the cases table with defects and entity_list
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS cases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            case_name TEXT NOT NULL,
-            docs BLOB,
-            raw_text BLOB,
-            user_id INTEGER,
-            processed_output TEXT,
-            additional_details TEXT,
-            defects TEXT,  
-            entity_list TEXT,
-            upload_date TEXT
-        )
+    CREATE TABLE IF NOT EXISTS cases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_name TEXT NOT NULL,
+        docs BLOB,
+        raw_text BLOB,
+        user_id INTEGER,
+        processed_output TEXT,
+        additional_details TEXT,
+        defects TEXT,  
+        entity_list TEXT,
+        upload_date TEXT,
+        defects_score TEXT,
+        timeline TEXT,
+        category TEXT,
+        sub_category TEXT,
+        past TEXT,
+        related TEXT
+    )
     ''')
+
 
     # Create tables for related cases and past judgments
     cursor.execute('''
@@ -118,10 +132,11 @@ def close_connection():
 # Function to insert a case into the database
 def insert_case(case):
     cursor.execute('''
-        INSERT INTO cases (case_name, docs, raw_text, user_id, processed_output, additional_details, defects, entity_list, upload_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO cases (case_name, docs, raw_text, user_id, processed_output, additional_details, defects, entity_list, upload_date, defects_score, timeline, category, sub_category, past, related)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (case.case_name, case.docs, case.raw_text, case.user_id, case.processed_output, case.additional_details,
-          case.defects, case.entity_list, case.upload_date.strftime('%Y-%m-%d')))
+          case.defects, case.entity_list, case.upload_date, case.defects_score, case.timeline,
+          case.category, case.sub_category, case.past, case.related))
     conn.commit()
     return cursor.lastrowid  # Return the id of the inserted case
 
@@ -176,6 +191,40 @@ def get_cases_by_user_id(user_id):
     else:
         return None
 
+@retry_on_failure
+def get_last_5_cases_by_user_id(user_id):
+    cursor.execute('''
+        SELECT * FROM cases WHERE user_id = ? ORDER BY upload_date DESC LIMIT 5
+    ''', (user_id,))
+    cases = cursor.fetchall()
+
+    if cases:
+        case_list = []
+        for case in cases:
+            case_dict = {
+                'id': case[0],
+                'case_name': case[1],
+                'docs': case[2],
+                'raw_text': case[3],
+                'user_id': case[4],
+                'processed_output': case[5],
+                'additional_details': case[6],
+                'defects': case[7],  # New field
+                'entity_list': case[8],  # New field
+                'upload_date': case[9],
+                'defects_score': case[10],
+                'timeline': case[11],
+                'category': case[12],
+                'sub_category': case[13],
+                'past': case[14],
+                'related': case[15]
+            }
+            case_list.append(case_dict)
+        return case_list
+    else:
+        return None
+
+
 # Function to add or update additional details of a case
 def update_additional_details(case_id, additional_details):
     cursor.execute('''
@@ -198,13 +247,20 @@ def get_case_by_name(case_name):
             'user_id': case[4],
             'processed_output': case[5],
             'additional_details': case[6],
-            'defects': case[7],  # New field
-            'entity_list': case[8],  # New field
-            'upload_date': case[9]
+            'defects': case[7],
+            'entity_list': case[8],
+            'upload_date': case[9],
+            'defects_score': case[10],
+            'timeline': case[11],     
+            'category': case[12],     
+            'sub_category': case[13], 
+            'past': case[14],         
+            'related': case[15]
         }
         return case_dict
     else:
         return None
+
 
 # Function to add or update processed output of a case
 def update_processed_output(case_name, processed_output):
@@ -262,6 +318,40 @@ def get_past_judgments(case_id):
         SELECT * FROM past_judgments WHERE case_id = ?
     ''', (case_id,))
     return cursor.fetchall()
+
+
+# new functions to update the stored results
+def update_defects_score(case_name, defects_score):
+    cursor.execute('''
+        UPDATE cases SET defects_score = ? WHERE case_name = ?
+    ''', (defects_score, case_name))
+    conn.commit()
+def update_timeline(case_name, timeline):
+    cursor.execute('''
+        UPDATE cases SET timeline = ? WHERE case_name = ?
+    ''', (timeline, case_name))
+    conn.commit()
+def update_category(case_name, category):
+    cursor.execute('''
+        UPDATE cases SET category = ? WHERE case_name = ?
+    ''', (category, case_name))
+    conn.commit()
+def update_sub_category(case_name, sub_category):
+    cursor.execute('''
+        UPDATE cases SET sub_category = ? WHERE case_name = ?
+    ''', (sub_category, case_name))
+    conn.commit()
+def update_past(case_name, past):
+    cursor.execute('''
+        UPDATE cases SET past = ? WHERE case_name = ?
+    ''', (past, case_name))
+    conn.commit()
+def update_related(case_name, related):
+    cursor.execute('''
+        UPDATE cases SET related = ? WHERE case_name = ?
+    ''', (related, case_name))
+    conn.commit()
+
 
 # Main function to drive the program
 def main():

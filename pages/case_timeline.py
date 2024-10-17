@@ -7,7 +7,7 @@ from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 import streamlit_shadcn_ui as ui
 from components.sidebar import render_sidebar
-from src.case import get_cases_by_user_id, update_defects, get_case_by_name
+from src.case import get_cases_by_user_id, update_defects, get_case_by_name, update_timeline
 from src.case import boot
 st.set_page_config(page_title="Timeline Of Events", layout="wide")
 boot()
@@ -64,27 +64,29 @@ def get_conversational_chain():
     chain = load_qa_chain(model,chain_type = "stuff",prompt = prompt)
     return chain
 
+
 def user_input_details(user_question):
-    # if st.session_state.responseSave5 == "":
-    with st.spinner("Processing"):
-        embeddings = HuggingFaceEmbeddings()
-        
-        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(user_question)
+    boot()
+    case_db = get_case_by_name(st.session_state.current_case_name)
+    if case_db["timeline"] == None:
+        with st.spinner("Processing"):
+            embeddings = HuggingFaceEmbeddings()
+            
+            new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            docs = new_db.similarity_search(user_question)
 
-        chain = get_conversational_chain()
+            chain = get_conversational_chain()
+            
+            response = chain(
+                {"input_documents":docs, "question": user_question}
+                , return_only_outputs=True)
 
-        
-        response = chain(
-            {"input_documents":docs, "question": user_question}
-            , return_only_outputs=True)
+            res = response["output_text"]
 
-        res = response["output_text"]
-        # st.write(res)
-        # st.session_state.responseSave5 = res
-        return res
-    # else:
-    #     return st.session_state.responseSave5
+            update_timeline(st.session_state.current_case_name,res)
+            return res
+    else:
+        return case_db["timeline"]
 
 ques = """You are an expert analyst, Compare the files uploaded and extract information to provide the case timelines with date and details in the below format:
 "

@@ -8,7 +8,7 @@ from langchain_community.embeddings import SentenceTransformerEmbeddings
 import streamlit_shadcn_ui as ui
 import os
 from dotenv import load_dotenv
-from src.case import get_cases_by_user_id, update_defects, get_case_by_name
+from src.case import get_cases_by_user_id, update_defects, get_case_by_name, update_defects_score
 from src.case import boot
 from components.sidebar import render_sidebar
 
@@ -132,7 +132,7 @@ def user_input_details(user_question):
 def user_input_details_2(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
-    if case_db["defects"] == None:
+    if case_db["defects_score"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -147,12 +147,12 @@ def user_input_details_2(user_question):
 
             res = response_1["output_text"]
            
-            update_defects(st.session_state.responseSave,res)
+            update_defects_score(st.session_state.current_case_name,res)
+            return res
 
     else:
-        res = 0.0
+        return case_db["defects_score"]
 
-    return res
 
 def user_input_details_3(user_question):
     boot()
@@ -171,10 +171,8 @@ def user_input_details_3(user_question):
             , return_only_outputs=True)
 
         res = response["output_text"]
-           
-        update_defects(st.session_state.responseSave1,res)
 
-    return res
+        return res
 
     
 col1, col2, col3 = st.columns(3)

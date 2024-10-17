@@ -8,7 +8,7 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
-from src.case import get_cases_by_user_id, get_related_cases, get_past_judgments, get_case_by_name
+from src.case import get_cases_by_user_id, get_related_cases, get_past_judgments, get_case_by_name, update_related
 from components.sidebar import render_sidebar
 from src.case import boot
 st.set_page_config(layout="wide")
@@ -101,16 +101,15 @@ def get_conversational_chain():
 def user_input_details(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
-    #if case_db["past_judgment"] == None:
-    with st.spinner("Processing"):
+    if case_db["related"] == None:
+        with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
-
+            
             new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
             docs = new_db.similarity_search(user_question)
 
             chain = get_conversational_chain()
-
-
+            
             response = chain(
                 {"input_documents":docs, "question": user_question}
                 , return_only_outputs=True)
@@ -118,6 +117,10 @@ def user_input_details(user_question):
             res = response["output_text"]
 
             st.markdown(res)
+
+            update_related(st.session_state.current_case_name,res)
+    else:
+        st.markdown(case_db["related"])
 
 
 
