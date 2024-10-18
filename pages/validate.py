@@ -8,15 +8,12 @@ from langchain_community.embeddings import SentenceTransformerEmbeddings
 import streamlit_shadcn_ui as ui
 import os
 from dotenv import load_dotenv
-from src.case import get_cases_by_user_id, update_defects, get_case_by_name, update_defects_score
+from src.case import get_cases_by_user_id, update_defects, get_case_by_name
 from src.case import boot
-from components.sidebar import render_sidebar
-
+st.set_page_config(layout="wide")
 import twilio
 from twilio.rest import Client
 import requests
-
-st.set_page_config(layout="wide")
 
 boot()
 
@@ -76,7 +73,31 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-render_sidebar()
+with st.sidebar:
+    st.sidebar.image("lawyer.png")
+
+    if ui.button("📝 New Case", className="bg-red-900 text-white", key="btn_new_case"):
+        st.switch_page("pages/new_case.py")
+
+    st.title("Case History")
+    boot()
+    user_cases = get_cases_by_user_id(1)
+    x = 1
+    if user_cases:
+        for case in user_cases:
+            if ui.button(f"📑 {case['case_name']}", className="bg-slate-600 text-white", key = f"ck{x}"):
+                st.session_state.current_case_name = case['case_name']
+                st.switch_page("pages/current_case.py")
+            x+=1
+    else:
+        print("No cases found for this user.")
+    
+    st.text_input("Search Previous Cases")
+    st.markdown("""---""")
+    ui.button("Settings ⚙️", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Help ❔", className="bg-neutral-500 text-white", size="sm")
+    ui.button("Logout 🚪", className="bg-neutral-500 text-white", size="sm")
+
 
 def get_conversational_chain():
     prompt_template = """
@@ -132,7 +153,7 @@ def user_input_details(user_question):
 def user_input_details_2(user_question):
     boot()
     case_db = get_case_by_name(st.session_state.current_case_name)
-    if case_db["defects_score"] == None:
+    if case_db["defects"] == None:
         with st.spinner("Processing"):
             embeddings = HuggingFaceEmbeddings()
             
@@ -147,12 +168,12 @@ def user_input_details_2(user_question):
 
             res = response_1["output_text"]
            
-            update_defects_score(st.session_state.current_case_name,res)
-            return res
+            update_defects(st.session_state.responseSave,res)
 
     else:
-        return case_db["defects_score"]
+        res = 0.0
 
+    return res
 
 def user_input_details_3(user_question):
     boot()
@@ -171,8 +192,10 @@ def user_input_details_3(user_question):
             , return_only_outputs=True)
 
         res = response["output_text"]
+           
+        update_defects(st.session_state.responseSave1,res)
 
-        return res
+    return res
 
     
 col1, col2, col3 = st.columns(3)
@@ -371,11 +394,30 @@ user_input_details(ques)
 
 st.subheader("NOTIFY ABOUT THE INCOMPLETE CLAUSES")
 
+TAS = ""
+TAT = ""
+WN = ""   
+
+if os.path.isdir("./config"):
+    print("local")
+    dotenv_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+    load_dotenv(dotenv_path)
+    TAS = os.getenv('TWILIO_ACCOUNT_SID')
+    TAT = os.getenv('TWILIO_AUTH_TOKEN')
+    WN = os.getenv('WHATSAPP_NUMBER')
+else:
+    print("Running on Streamlit Cloud")
+    TAS = st.secrets["TWILIO_ACCOUNT_SID"]
+    TAT = st.secrets["TWILIO_AUTH_TOKEN"]
+    WN = st.secrets["WHATSAPP_NUMBER"]
+    
+
 st.write("This will send a report to the advocate via Whatsapp regarding the defects in the documents.")
 
 mobile_number = st.text_input("Advocate's Mobile No. (Extracted via the documents)", "+919591269696")
+
 # Initialize Twilio client
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+client = Client(TAS,TAT)
 
 # Streamlit UI
 #st.title("WhatsApp Chatbot Dashboard")
@@ -390,8 +432,8 @@ if ui.button("NOTIFY", className="bg-sky-900 text-white", size="sm", key ="notif
 
     response = client.messages.create(
                 body=message,
-                from_=WHATSAPP_NUMBER,
-                to=TO_NUMBER
+                from_=WN,
+                to=str('whatsapp:'+mobile_number)
             )
 
     st.success(f"Notification sent to {mobile_number}")
